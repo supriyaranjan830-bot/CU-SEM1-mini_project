@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CareerTrack — Job & Internship Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f8fafc;--bg2:#fff;--bg3:#f1f5f9;
+  --primary:#4f46e5;--primary-light:#818cf8;--primary-dark:#3730a3;
+  --pink:#ec4899;--teal:#14b8a6;--amber:#f59e0b;--red:#ef4444;--green:#22c55e;--orange:#f97316;
+  --text:#0f172a;--text2:#64748b;--text3:#94a3b8;--border:#e2e8f0;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+  --shadow-md:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06);
+  --shadow-lg:0 10px 15px rgba(0,0,0,.1),0 4px 6px rgba(0,0,0,.05);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* NAV */
+.navbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;height:64px;display:flex;align-items:center;gap:20px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--pink));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.brand-name{font-size:1.1rem;font-weight:800;color:var(--text)}
+.nav-links{display:flex;gap:4px;margin-left:16px}
+.nav-link{padding:8px 14px;border-radius:8px;font-size:.85rem;font-weight:500;color:var(--text2);cursor:pointer;transition:.15s;border:none;background:none}
+.nav-link:hover,.nav-link.active{background:rgba(79,70,229,.08);color:var(--primary)}
+.nav-spacer{flex:1}
+.btn{padding:9px 18px;border-radius:10px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:.84rem;font-weight:600;transition:.2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;box-shadow:0 4px 14px rgba(79,70,229,.3)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(79,70,229,.4)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+.btn-danger{background:#fef2f2;border:1px solid #fecaca;color:var(--red)}
+.btn-sm{padding:5px 12px;font-size:.76rem;border-radius:7px}
+
+/* LAYOUT */
+.main{padding:24px;max-width:1400px;margin:0 auto}
+.view{display:none}.view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.view.active{animation:fadeIn .25s ease}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow)}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center;box-shadow:var(--shadow);transition:.2s}
+.stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.stat-num{font-size:2rem;font-weight:800;line-height:1}
+.stat-label{font-size:.75rem;color:var(--text2);margin-top:4px;font-weight:500}
+.stat.applied .stat-num{color:var(--primary)}
+.stat.interview .stat-num{color:var(--amber)}
+.stat.offer .stat-num{color:var(--green)}
+.stat.reject .stat-num{color:var(--red)}
+.stat.pending .stat-num{color:var(--text2)}
+
+/* PIPELINE */
+.pipeline{display:flex;gap:0;margin-bottom:22px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.pipe-stage{flex:1;padding:14px 12px;text-align:center;border-right:1px solid var(--border);cursor:pointer;transition:.2s;position:relative}
+.pipe-stage:last-child{border-right:none}
+.pipe-stage:hover{background:rgba(79,70,229,.04)}
+.pipe-label{font-size:.72rem;color:var(--text2);font-weight:500;margin-bottom:4px}
+.pipe-count{font-size:1.3rem;font-weight:800}
+.pipe-stage.applied .pipe-count{color:var(--primary)}
+.pipe-stage.screening .pipe-count{color:var(--amber)}
+.pipe-stage.interview .pipe-count{color:var(--orange)}
+.pipe-stage.offer .pipe-count{color:var(--green)}
+.pipe-stage.rejected .pipe-count{color:var(--red)}
+
+/* APP GRID */
+.app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.app-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:var(--shadow);transition:.2s;cursor:pointer}
+.app-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:rgba(79,70,229,.3)}
+.app-card-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.company-avatar{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;color:#fff;flex-shrink:0}
+.app-meta{flex:1}
+.app-company{font-size:.95rem;font-weight:700}
+.app-role{font-size:.82rem;color:var(--text2);margin-top:1px}
+.app-card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.68rem;font-weight:600}
+.tag-type{background:#ede9fe;color:var(--primary)}
+.tag-remote{background:#f0fdf4;color:var(--green)}
+.tag-onsite{background:#fff7ed;color:var(--orange)}
+.tag-hybrid{background:#eff6ff;color:#3b82f6}
+.app-deadline{font-size:.75rem;color:var(--text2);display:flex;align-items:center;gap:5px;margin-bottom:10px}
+.deadline-urgent{color:var(--red);font-weight:600}
+.deadline-warn{color:var(--amber);font-weight:600}
+.app-card-actions{display:flex;gap:6px;justify-content:flex-end}
+
+/* STATUS BADGES */
+.status{display:inline-block;padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:700;letter-spacing:.3px}
+.status-applied{background:#ede9fe;color:var(--primary)}
+.status-screening{background:#fef3c7;color:#92400e}
+.status-interview{background:#fff7ed;color:var(--orange)}
+.status-technical{background:#eff6ff;color:#2563eb}
+.status-hr{background:#f0fdf4;color:var(--green)}
+.status-offer{background:#dcfce7;color:#15803d}
+.status-rejected{background:#fef2f2;color:var(--red)}
+.status-withdrawn{background:#f8fafc;color:var(--text3)}
+
+/* PRIORITY */
+.priority-high{color:var(--red)}.priority-medium{color:var(--amber)}.priority-low{color:var(--green)}
+
+/* SEARCH & FILTER */
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.search-input{flex:1;min-width:200px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px 14px;font-family:'Inter',sans-serif;font-size:.85rem;color:var(--text);outline:none;transition:.2s;box-shadow:var(--shadow)}
+.search-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+select.filter-sel{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-family:'Inter',sans-serif;font-size:.82rem;color:var(--text);outline:none;cursor:pointer;box-shadow:var(--shadow)}
+
+/* DEADLINES */
+.deadline-list{display:flex;flex-direction:column;gap:10px}
+.dl-item{display:flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;box-shadow:var(--shadow)}
+.dl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dl-info{flex:1}
+.dl-company{font-size:.85rem;font-weight:600}
+.dl-role{font-size:.76rem;color:var(--text2)}
+.dl-countdown{font-size:.8rem;font-weight:700;white-space:nowrap}
+
+/* PROGRESS RING */
+.progress-ring-wrap{display:flex;align-items:center;gap:20px;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:var(--shadow)}
+.ring-info{flex:1}
+.ring-title{font-size:1rem;font-weight:700;margin-bottom:4px}
+.ring-sub{font-size:.82rem;color:var(--text2)}
+
+/* ANALYTICS BARS */
+.analytics-bar{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.analytics-label{font-size:.78rem;color:var(--text2);width:120px;flex-shrink:0}
+.analytics-track{flex:1;background:var(--bg3);border-radius:4px;height:18px;overflow:hidden}
+.analytics-fill{height:100%;border-radius:4px;transition:width 1s ease;display:flex;align-items:center;padding:0 8px;font-size:.65rem;font-weight:700;color:#fff}
+.analytics-val{font-size:.76rem;color:var(--text2);width:35px;text-align:right}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1000;align-items:flex-start;justify-content:center;padding-top:60px;backdrop-filter:blur(3px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;width:90%;max-width:680px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15);animation:modalIn .25s ease}
+@keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(-10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal h2{font-size:1.15rem;font-weight:800;margin-bottom:20px;color:var(--text)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+label{font-size:.76rem;font-weight:600;color:var(--text2)}
+input[type=text],input[type=email],input[type=url],input[type=date],input[type=number],select,textarea{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Inter',sans-serif;font-size:.83rem;outline:none;transition:.2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+select option{background:var(--bg2)}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid var(--border)}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column-reverse;gap:8px}
+.toast{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:.82rem;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;animation:toastIn .3s ease;min-width:240px}
+.toast.success{border-color:#86efac;color:var(--green)}
+.toast.error{border-color:#fca5a5;color:var(--red)}
+.toast.info{border-color:#a5b4fc;color:var(--primary)}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* CONFETTI */
+.confetti-piece{position:fixed;width:10px;height:10px;top:-10px;border-radius:2px;pointer-events:none;z-index:9998}
+
+/* CALENDAR */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-header{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
+.cal-day-header{font-size:.68rem;font-weight:600;color:var(--text2);text-align:center;padding:6px}
+.cal-day{min-height:70px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px;font-size:.72rem}
+.cal-day.today{border-color:var(--primary);background:#ede9fe10}
+.cal-day.empty{background:transparent;border:none}
+.cal-day-num{font-weight:600;color:var(--text2);margin-bottom:3px}
+.cal-event{font-size:.62rem;padding:2px 5px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* LIST VIEW */
+.app-list{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.app-list-row{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border);transition:.15s;cursor:pointer}
+.app-list-row:last-child{border-bottom:none}
+.app-list-row:hover{background:rgba(79,70,229,.03)}
+
+@media(max-width:768px){
+  .form-grid,.stats-row{grid-template-columns:1fr}
+  .pipeline{flex-wrap:wrap}
+  .nav-links{display:none}
+  .app-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a class="brand" href="#">
+    <div class="brand-icon">💼</div>
+    <div class="brand-name">CareerTrack</div>
+  </a>
+  <div class="nav-links">
+    <button class="nav-link active" onclick="showView('dashboard',this)">Dashboard</button>
+    <button class="nav-link" onclick="showView('applications',this)">Applications</button>
+    <button class="nav-link" onclick="showView('calendar',this)">Calendar</button>
+    <button class="nav-link" onclick="showView('analytics',this)">Analytics</button>
+  </div>
+  <div class="nav-spacer"></div>
+  <button class="btn btn-primary" onclick="openAddModal()">+ Add Application</button>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- DASHBOARD VIEW -->
+  <div class="view active" id="view-dashboard">
+    <!-- Progress Ring -->
+    <div class="progress-ring-wrap">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <circle cx="40" cy="40" r="32" fill="none" stroke="#e2e8f0" stroke-width="8"/>
+        <circle id="ring-circle" cx="40" cy="40" r="32" fill="none" stroke="url(#rg)" stroke-width="8" stroke-linecap="round" stroke-dasharray="201" stroke-dashoffset="201" transform="rotate(-90 40 40)"/>
+        <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#4f46e5"/><stop offset="1" stop-color="#ec4899"/></linearGradient></defs>
+        <text x="40" y="38" text-anchor="middle" font-size="14" font-weight="800" fill="#0f172a" id="ring-pct">0%</text>
+        <text x="40" y="52" text-anchor="middle" font-size="7" fill="#64748b">Progress</text>
+      </svg>
+      <div class="ring-info">
+        <div class="ring-title">Your Career Journey Dashboard 🚀</div>
+        <div class="ring-sub" id="ring-sub">Loading your applications...</div>
+        <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap" id="ring-tags"></div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:.76rem;color:var(--text2)">Monthly Goal</div>
+        <div style="font-size:1.6rem;font-weight:800;color:var(--primary)" id="goal-progress">0/10</div>
+        <div style="font-size:.72rem;color:var(--text2)">applications</div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row" id="stats-row"></div>
+
+    <!-- Pipeline -->
+    <div class="pipeline" id="pipeline"></div>
+
+    <!-- Deadlines + Recent -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px">
+      <div class="card" style="padding:18px">
+        <div style="font-size:.9rem;font-weight:700;margin-bottom:14px">⏰ Upcoming Deadlines</div>
+        <div class="deadline-list" id="deadline-list"></div>
+      </div>
+      <div class="card" style="padding:18px">
+        <div style="font-size:.9rem;font-weight:700;margin-bottom:14px">🕐 Recent Applications</div>
+        <div id="recent-list" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLICATIONS VIEW -->
+  <div class="view" id="view-applications">
+    <div class="toolbar">
+      <input class="search-input" placeholder="🔍 Search by company, role, location..." oninput="filterApps(this.value)"/>
+      <select class="filter-sel" onchange="filterByStatus(this.value)">
+        <option value="">All Status</option>
+        <option>Applied</option><option>Under Review</option><option>Interview Scheduled</option>
+        <option>Technical Round</option><option>HR Round</option><option>Offer Received</option>
+        <option>Rejected</option><option>Withdrawn</option>
+      </select>
+      <select class="filter-sel" onchange="filterByType(this.value)">
+        <option value="">All Types</option><option>Full-time</option><option>Internship</option><option>Part-time</option><option>Contract</option>
+      </select>
+      <select class="filter-sel" onchange="sortApps(this.value)">
+        <option value="date">Sort: Date</option><option value="company">Company</option><option value="deadline">Deadline</option>
+      </select>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="setView('card')">⊞ Cards</button>
+        <button class="btn btn-ghost btn-sm" onclick="setView('list')">≡ List</button>
+      </div>
+    </div>
+    <div id="app-container"></div>
+  </div>
+
+  <!-- CALENDAR VIEW -->
+  <div class="view" id="view-calendar">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <h2 style="font-size:1.1rem;font-weight:700" id="cal-month-title"></h2>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" onclick="changeMonth(-1)">← Prev</button>
+        <button class="btn btn-ghost btn-sm" onclick="changeMonth(1)">Next →</button>
+      </div>
+    </div>
+    <div class="cal-header">
+      <div class="cal-day-header">Sun</div><div class="cal-day-header">Mon</div><div class="cal-day-header">Tue</div>
+      <div class="cal-day-header">Wed</div><div class="cal-day-header">Thu</div><div class="cal-day-header">Fri</div>
+      <div class="cal-day-header">Sat</div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+
+  <!-- ANALYTICS VIEW -->
+  <div class="view" id="view-analytics">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="card" style="padding:20px">
+        <div style="font-size:.9rem;font-weight:700;margin-bottom:16px">📊 Applications by Status</div>
+        <div id="analytics-status-bars"></div>
+      </div>
+      <div class="card" style="padding:20px">
+        <div style="font-size:.9rem;font-weight:700;margin-bottom:16px">🎯 Applications by Type</div>
+        <div id="analytics-type-bars"></div>
+      </div>
+      <div class="card" style="padding:20px">
+        <div style="font-size:.9rem;font-weight:700;margin-bottom:16px">📅 Applications by Month</div>
+        <div id="analytics-month-bars"></div>
+      </div>
+      <div class="card" style="padding:20px">
+        <div style="font-size:.9rem;font-weight:700;margin-bottom:16px">🏆 Conversion Funnel</div>
+        <div id="analytics-funnel"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="modal-app">
+  <div class="modal">
+    <h2 id="modal-title">➕ Add New Application</h2>
+    <div class="form-grid">
+      <div class="form-group"><label>Company Name *</label><input id="f-company" type="text" placeholder="e.g. Google"/></div>
+      <div class="form-group"><label>Job Title *</label><input id="f-role" type="text" placeholder="e.g. Software Engineer"/></div>
+      <div class="form-group"><label>Job Type</label>
+        <select id="f-type"><option>Full-time</option><option>Internship</option><option>Part-time</option><option>Contract</option></select>
+      </div>
+      <div class="form-group"><label>Status</label>
+        <select id="f-status"><option>Applied</option><option>Under Review</option><option>Interview Scheduled</option><option>Technical Round</option><option>HR Round</option><option>Offer Received</option><option>Rejected</option><option>Withdrawn</option></select>
+      </div>
+      <div class="form-group"><label>Application Date</label><input id="f-date" type="date"/></div>
+      <div class="form-group"><label>Deadline</label><input id="f-deadline" type="date"/></div>
+      <div class="form-group"><label>Location Type</label>
+        <select id="f-location"><option>Remote</option><option>Hybrid</option><option>On-site</option></select>
+      </div>
+      <div class="form-group"><label>City</label><input id="f-city" type="text" placeholder="e.g. Bangalore"/></div>
+      <div class="form-group"><label>Salary / Stipend</label><input id="f-salary" type="text" placeholder="e.g. ₹8-12 LPA or ₹25K/month"/></div>
+      <div class="form-group"><label>Priority</label>
+        <select id="f-priority"><option>High</option><option>Medium</option><option>Low</option></select>
+      </div>
+      <div class="form-group"><label>Job URL</label><input id="f-url" type="url" placeholder="https://..."/></div>
+      <div class="form-group"><label>Contact Person</label><input id="f-contact" type="text" placeholder="Recruiter name"/></div>
+      <div class="form-group full"><label>Notes</label><textarea id="f-notes" rows="2" placeholder="Any notes, referral info, etc."></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveApp()">💾 Save Application</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW MODAL -->
+<div class="modal-overlay" id="modal-view">
+  <div class="modal" style="max-width:520px">
+    <div id="view-app-content"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="document.getElementById('modal-view').classList.remove('open')">Close</button></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+const STATUS_MAP={
+  'Applied':'status-applied','Under Review':'status-screening',
+  'Interview Scheduled':'status-interview','Technical Round':'status-technical',
+  'HR Round':'status-hr','Offer Received':'status-offer',
+  'Rejected':'status-rejected','Withdrawn':'status-withdrawn'
+};
+const STATUS_COLORS={'Applied':'#4f46e5','Under Review':'#f59e0b','Interview Scheduled':'#f97316','Technical Round':'#3b82f6','HR Round':'#22c55e','Offer Received':'#15803d','Rejected':'#ef4444','Withdrawn':'#94a3b8'};
+const TYPE_COLORS={'Full-time':'#4f46e5','Internship':'#14b8a6','Part-time':'#f59e0b','Contract':'#f97316'};
+const AVT_COLORS=['#4f46e5','#ec4899','#14b8a6','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#d97706'];
+const MONTHS_SHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+const SEED_DATA=[
+  {id:1,company:'Google',role:'Software Engineer Intern',type:'Internship',status:'Interview Scheduled',date:'2024-09-15',deadline:'2024-11-15',location:'Hybrid',city:'Bangalore',salary:'₹80K/month',priority:'High',url:'',contact:'Priya R.',notes:'Got referral from college senior.',fav:true},
+  {id:2,company:'Microsoft',role:'SDE - 1',type:'Full-time',status:'Technical Round',date:'2024-09-20',deadline:'2024-11-30',location:'Hybrid',city:'Hyderabad',salary:'₹18-24 LPA',priority:'High',url:'',contact:'',notes:'',fav:false},
+  {id:3,company:'Swiggy',role:'Backend Engineer Intern',type:'Internship',status:'Applied',date:'2024-10-01',deadline:'2024-11-10',location:'On-site',city:'Bangalore',salary:'₹50K/month',priority:'Medium',url:'',contact:'',notes:'Applied via LinkedIn',fav:false},
+  {id:4,company:'Infosys',role:'Systems Engineer',type:'Full-time',status:'Offer Received',date:'2024-08-20',deadline:'2024-10-01',location:'On-site',city:'Pune',salary:'₹6.5 LPA',priority:'Low',url:'',contact:'HR Team',notes:'Campus placement offer.',fav:true},
+  {id:5,company:'TCS',role:'Assistant System Engineer',type:'Full-time',status:'Offer Received',date:'2024-08-25',deadline:'2024-10-15',location:'On-site',city:'Chennai',salary:'₹7 LPA',priority:'Low',url:'',contact:'',notes:'',fav:false},
+  {id:6,company:'Razorpay',role:'Product Intern',type:'Internship',status:'Rejected',date:'2024-09-10',deadline:'2024-10-20',location:'Remote',city:'',salary:'₹35K/month',priority:'Medium',url:'',contact:'',notes:'Failed OA round.',fav:false},
+  {id:7,company:'Zomato',role:'Frontend Developer',type:'Full-time',status:'Under Review',date:'2024-10-10',deadline:'2024-11-25',location:'Hybrid',city:'Gurgaon',salary:'₹12-18 LPA',priority:'High',url:'',contact:'',notes:'',fav:false},
+  {id:8,company:'Flipkart',role:'SDE Intern',type:'Internship',status:'Applied',date:'2024-10-14',deadline:'2024-11-20',location:'On-site',city:'Bangalore',salary:'₹60K/month',priority:'High',url:'',contact:'',notes:'Dream company!',fav:true},
+  {id:9,company:'Adobe',role:'UI Engineer Intern',type:'Internship',status:'HR Round',date:'2024-09-28',deadline:'2024-11-08',location:'Hybrid',city:'Noida',salary:'₹70K/month',priority:'High',url:'',contact:'Sneha M.',notes:'',fav:false},
+  {id:10,company:'Deloitte',role:'Analyst',type:'Full-time',status:'Applied',date:'2024-10-16',deadline:'2024-12-01',location:'On-site',city:'Mumbai',salary:'₹8 LPA',priority:'Medium',url:'',contact:'',notes:'Applied via naukri.com',fav:false},
+];
+
+function getData(){return JSON.parse(localStorage.getItem('ct_apps')||'null')||SEED_DATA}
+function saveData(d){localStorage.setItem('ct_apps',JSON.stringify(d))}
+if(!localStorage.getItem('ct_apps'))saveData(SEED_DATA);
+
+let editId=null,viewMode='card',filterQ='',filterStatus='',filterType='',sortKey='date';
+let calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
+
+window.onload=()=>{
+  refreshDashboard();renderApps();renderCalendar();renderAnalytics();
+};
+
+function showView(name,el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  if(el)el.classList.add('active');
+  if(name==='applications')renderApps();
+  if(name==='calendar')renderCalendar();
+  if(name==='analytics')renderAnalytics();
+}
+
+// ==================== DASHBOARD ====================
+function refreshDashboard(){
+  const apps=getData();
+  const total=apps.length;
+  const statuses={};apps.forEach(a=>statuses[a.status]=(statuses[a.status]||0)+1);
+  const offers=(statuses['Offer Received']||0);
+  const interviews=(statuses['Interview Scheduled']||0)+(statuses['Technical Round']||0)+(statuses['HR Round']||0);
+  const rejected=statuses['Rejected']||0;
+  const pending=(statuses['Applied']||0)+(statuses['Under Review']||0);
+  // Stats
+  const sr=document.getElementById('stats-row');sr.innerHTML='';
+  [{label:'Total Applied',val:total,cls:'applied'},{label:'Interviews',val:interviews,cls:'interview'},
+   {label:'Offers',val:offers,cls:'offer'},{label:'Rejected',val:rejected,cls:'reject'},
+   {label:'Pending',val:pending,cls:'pending'}].forEach(s=>{
+    sr.innerHTML+=`<div class="stat ${s.cls}"><div class="stat-num">${s.val}</div><div class="stat-label">${s.label}</div></div>`;
+  });
+  // Pipeline
+  const pl=document.getElementById('pipeline');pl.innerHTML='';
+  [['Applied',pending,'applied'],['Screening',statuses['Under Review']||0,'screening'],
+   ['Interview',interviews,'interview'],['Offer',offers,'offer'],
+   ['Rejected',rejected,'rejected']].forEach(([label,count,cls])=>{
+    pl.innerHTML+=`<div class="pipe-stage ${cls}"><div class="pipe-label">${label}</div><div class="pipe-count">${count}</div></div>`;
+  });
+  // Progress ring
+  const goal=10;const pct=Math.round(Math.min(total/goal,1)*100);
+  const circ=2*Math.PI*32;
+  const offset=circ-(pct/100)*circ;
+  document.getElementById('ring-circle').style.strokeDashoffset=offset;
+  document.getElementById('ring-pct').textContent=pct+'%';
+  document.getElementById('ring-sub').textContent=`${total} applications tracked across ${Object.keys(statuses).length} stages`;
+  document.getElementById('goal-progress').textContent=`${Math.min(total,goal)}/${goal}`;
+  const rt=document.getElementById('ring-tags');rt.innerHTML='';
+  if(offers>0)rt.innerHTML+=`<span class="tag tag-type" style="background:#dcfce7;color:#15803d">🎉 ${offers} Offer${offers>1?'s':''}</span>`;
+  if(interviews>0)rt.innerHTML+=`<span class="tag tag-type">📅 ${interviews} Interviews</span>`;
+  // Deadlines
+  const now=new Date();now.setHours(0,0,0,0);
+  const upcoming=apps.filter(a=>a.deadline&&new Date(a.deadline)>=now&&!['Offer Received','Rejected','Withdrawn'].includes(a.status))
+    .sort((a,b)=>new Date(a.deadline)-new Date(b.deadline)).slice(0,5);
+  const dl=document.getElementById('deadline-list');dl.innerHTML='';
+  if(!upcoming.length){dl.innerHTML='<div style="color:var(--text2);font-size:.82rem">No upcoming deadlines 🎉</div>';return}
+  upcoming.forEach(a=>{
+    const diff=Math.ceil((new Date(a.deadline)-now)/(1000*60*60*24));
+    const urgency=diff<=2?'deadline-urgent':diff<=5?'deadline-warn':'';
+    const dotColor=diff<=2?'var(--red)':diff<=5?'var(--amber)':'var(--green)';
+    dl.innerHTML+=`<div class="dl-item">
+      <div class="dl-dot" style="background:${dotColor}"></div>
+      <div class="dl-info"><div class="dl-company">${a.company}</div><div class="dl-role">${a.role}</div></div>
+      <div class="dl-countdown ${urgency}">${diff===0?'Today!':diff===1?'Tomorrow':diff+' days'}</div>
+    </div>`;
+  });
+  // Recent
+  const recent=document.getElementById('recent-list');recent.innerHTML='';
+  apps.slice().sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5).forEach(a=>{
+    const init=a.company.slice(0,2).toUpperCase();
+    const color=AVT_COLORS[a.company.charCodeAt(0)%AVT_COLORS.length];
+    recent.innerHTML+=`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="width:36px;height:36px;border-radius:8px;background:${color};display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0">${init}</div>
+      <div style="flex:1"><div style="font-size:.83rem;font-weight:600">${a.company}</div><div style="font-size:.72rem;color:var(--text2)">${a.role}</div></div>
+      <span class="status ${STATUS_MAP[a.status]}">${a.status}</span>
+    </div>`;
+  });
+}
+
+// ==================== APPLICATIONS ====================
+function renderApps(){
+  let apps=getData();
+  if(filterQ)apps=apps.filter(a=>(a.company+a.role+a.city).toLowerCase().includes(filterQ));
+  if(filterStatus)apps=apps.filter(a=>a.status===filterStatus);
+  if(filterType)apps=apps.filter(a=>a.type===filterType);
+  apps.sort((a,b)=>sortKey==='company'?a.company.localeCompare(b.company):sortKey==='deadline'?(new Date(a.deadline||'9999')-new Date(b.deadline||'9999')):(new Date(b.date)-new Date(a.date)));
+  const c=document.getElementById('app-container');
+  if(viewMode==='card'){
+    c.innerHTML=`<div class="app-grid">${apps.map(appCard).join('')}</div>`;
+  }else{
+    c.innerHTML=`<div class="app-list">${apps.map(appListRow).join('')}</div>`;
+  }
+}
+function appCard(a){
+  const now=new Date();now.setHours(0,0,0,0);
+  const color=AVT_COLORS[a.company.charCodeAt(0)%AVT_COLORS.length];
+  const init=a.company.slice(0,2).toUpperCase();
+  let deadlineHtml='';
+  if(a.deadline){
+    const diff=Math.ceil((new Date(a.deadline)-now)/(1000*60*60*24));
+    const cls=diff<=2?'deadline-urgent':diff<=5?'deadline-warn':'';
+    const label=diff<0?'Expired':diff===0?'Due Today!':diff===1?'Due Tomorrow':`Due in ${diff} days`;
+    deadlineHtml=`<div class="app-deadline ${cls}">⏰ ${label} (${a.deadline})</div>`;
+  }
+  return`<div class="app-card">
+    <div class="app-card-top">
+      <div class="company-avatar" style="background:${color}">${init}</div>
+      <div class="app-meta">
+        <div class="app-company">${a.company} ${a.fav?'⭐':''}</div>
+        <div class="app-role">${a.role}</div>
+      </div>
+      <span class="status ${STATUS_MAP[a.status]||''}">${a.status}</span>
+    </div>
+    <div class="app-card-tags">
+      <span class="tag ${a.type==='Internship'?'tag-type':''}" style="${a.type!=='Internship'?`background:${TYPE_COLORS[a.type]||'#ede9fe'}20;color:${TYPE_COLORS[a.type]||'#4f46e5'}`:''}">${a.type}</span>
+      <span class="tag ${a.location==='Remote'?'tag-remote':a.location==='On-site'?'tag-onsite':'tag-hybrid'}">${a.location}${a.city?' · '+a.city:''}</span>
+      ${a.salary?`<span class="tag" style="background:#f0fdf4;color:var(--green)">💰 ${a.salary}</span>`:''}
+      <span class="tag" style="color:${a.priority==='High'?'var(--red)':a.priority==='Medium'?'var(--amber)':'var(--green)'};background:${a.priority==='High'?'#fef2f2':a.priority==='Medium'?'#fffbeb':'#f0fdf4'}">● ${a.priority}</span>
+    </div>
+    ${deadlineHtml}
+    <div class="app-card-actions">
+      <button class="btn btn-ghost btn-sm" onclick="viewApp(${a.id})">👁 View</button>
+      <button class="btn btn-ghost btn-sm" onclick="editApp(${a.id})">✏️ Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteApp(${a.id})">🗑</button>
+    </div>
+  </div>`;
+}
+function appListRow(a){
+  const color=AVT_COLORS[a.company.charCodeAt(0)%AVT_COLORS.length];
+  const init=a.company.slice(0,2).toUpperCase();
+  return`<div class="app-list-row" onclick="viewApp(${a.id})">
+    <div style="width:34px;height:34px;border-radius:8px;background:${color};display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0">${init}</div>
+    <div style="flex:1"><b>${a.company}</b> ${a.fav?'⭐':''}<span style="color:var(--text2);font-size:.8rem"> · ${a.role}</span></div>
+    <span class="tag" style="background:${TYPE_COLORS[a.type]||'#ede9fe'}20;color:${TYPE_COLORS[a.type]||'#4f46e5'}">${a.type}</span>
+    <span class="status ${STATUS_MAP[a.status]||''}">${a.status}</span>
+    <span style="font-size:.75rem;color:var(--text2)">${a.date}</span>
+    <div style="display:flex;gap:4px">
+      <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();editApp(${a.id})">✏️</button>
+      <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteApp(${a.id})">🗑</button>
+    </div>
+  </div>`;
+}
+function setView(mode){viewMode=mode;renderApps()}
+function filterApps(q){filterQ=q.toLowerCase();renderApps()}
+function filterByStatus(s){filterStatus=s;renderApps()}
+function filterByType(t){filterType=t;renderApps()}
+function sortApps(k){sortKey=k;renderApps()}
+
+// ==================== VIEW / EDIT / DELETE ====================
+function viewApp(id){
+  const a=getData().find(x=>x.id===id);if(!a)return;
+  const color=AVT_COLORS[a.company.charCodeAt(0)%AVT_COLORS.length];
+  document.getElementById('view-app-content').innerHTML=`
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+      <div style="width:56px;height:56px;border-radius:14px;background:${color};display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:800;color:#fff">${a.company.slice(0,2).toUpperCase()}</div>
+      <div><div style="font-size:1.1rem;font-weight:800">${a.company} ${a.fav?'⭐':''}</div><div style="color:var(--text2)">${a.role}</div></div>
+      <span class="status ${STATUS_MAP[a.status]||''}" style="margin-left:auto">${a.status}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      ${viewRow('Type',a.type)}${viewRow('Location',a.location+(a.city?' · '+a.city:''))}
+      ${viewRow('Applied',a.date)}${viewRow('Deadline',a.deadline||'—')}
+      ${viewRow('Salary',a.salary||'—')}${viewRow('Priority',a.priority)}
+      ${viewRow('Contact',a.contact||'—')}${viewRow('URL',a.url?`<a href="${a.url}" target="_blank" style="color:var(--primary)">Open Link</a>`:'—')}
+    </div>
+    ${a.notes?`<div style="margin-top:12px;background:var(--bg3);border-radius:8px;padding:12px;font-size:.82rem"><b>Notes:</b> ${a.notes}</div>`:''}`;
+  document.getElementById('modal-view').classList.add('open');
+}
+function viewRow(label,val){return`<div style="background:var(--bg3);border-radius:8px;padding:10px"><div style="font-size:.68rem;color:var(--text2);font-weight:600;margin-bottom:2px">${label}</div><div style="font-size:.83rem;font-weight:500">${val}</div></div>`}
+
+function editApp(id){
+  const a=getData().find(x=>x.id===id);if(!a)return;
+  editId=id;document.getElementById('modal-title').textContent='✏️ Edit Application';
+  document.getElementById('f-company').value=a.company;document.getElementById('f-role').value=a.role;
+  document.getElementById('f-type').value=a.type;document.getElementById('f-status').value=a.status;
+  document.getElementById('f-date').value=a.date;document.getElementById('f-deadline').value=a.deadline||'';
+  document.getElementById('f-location').value=a.location;document.getElementById('f-city').value=a.city||'';
+  document.getElementById('f-salary').value=a.salary||'';document.getElementById('f-priority').value=a.priority;
+  document.getElementById('f-url').value=a.url||'';document.getElementById('f-contact').value=a.contact||'';
+  document.getElementById('f-notes').value=a.notes||'';
+  document.getElementById('modal-app').classList.add('open');
+}
+function deleteApp(id){
+  if(!confirm('Remove this application?'))return;
+  const apps=getData().filter(a=>a.id!==id);saveData(apps);
+  toast('Application removed','error');refreshDashboard();renderApps();
+}
+
+// ==================== ADD/SAVE ====================
+function openAddModal(){
+  editId=null;document.getElementById('modal-title').textContent='➕ Add New Application';
+  ['company','role','city','salary','url','contact','notes'].forEach(f=>document.getElementById('f-'+f).value='');
+  document.getElementById('f-type').value='Full-time';document.getElementById('f-status').value='Applied';
+  document.getElementById('f-location').value='Remote';document.getElementById('f-priority').value='Medium';
+  document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('f-deadline').value='';
+  document.getElementById('modal-app').classList.add('open');
+}
+function saveApp(){
+  const company=document.getElementById('f-company').value.trim();
+  const role=document.getElementById('f-role').value.trim();
+  if(!company||!role){toast('Company and role are required!','error');return}
+  const apps=getData();
+  const isOffer=document.getElementById('f-status').value==='Offer Received';
+  const app={
+    id:editId||Date.now(),company,role,
+    type:document.getElementById('f-type').value,
+    status:document.getElementById('f-status').value,
+    date:document.getElementById('f-date').value,
+    deadline:document.getElementById('f-deadline').value,
+    location:document.getElementById('f-location').value,
+    city:document.getElementById('f-city').value,
+    salary:document.getElementById('f-salary').value,
+    priority:document.getElementById('f-priority').value,
+    url:document.getElementById('f-url').value,
+    contact:document.getElementById('f-contact').value,
+    notes:document.getElementById('f-notes').value,
+    fav:editId?apps.find(a=>a.id===editId)?.fav||false:false
+  };
+  if(editId){const idx=apps.findIndex(a=>a.id===editId);if(idx>=0)apps[idx]=app;}
+  else apps.unshift(app);
+  saveData(apps);closeModal();
+  if(isOffer&&!editId)confetti();
+  toast(editId?'Application updated!':'Application added!','success');
+  refreshDashboard();renderApps();renderCalendar();renderAnalytics();
+}
+function closeModal(){document.getElementById('modal-app').classList.remove('open')}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
+
+// ==================== CALENDAR ====================
+const MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function renderCalendar(){
+  document.getElementById('cal-month-title').textContent=`${MONTH_NAMES[calMonth]} ${calYear}`;
+  const apps=getData();
+  const events={};
+  apps.forEach(a=>{
+    if(a.date&&new Date(a.date).getMonth()===calMonth&&new Date(a.date).getFullYear()===calYear){
+      const d=parseInt(a.date.split('-')[2]);events[d]=events[d]||[];events[d].push({label:a.company,color:STATUS_COLORS[a.status]||'#4f46e5',type:'applied'});
+    }
+    if(a.deadline&&new Date(a.deadline).getMonth()===calMonth&&new Date(a.deadline).getFullYear()===calYear){
+      const d=parseInt(a.deadline.split('-')[2]);events[d]=events[d]||[];events[d].push({label:'⏰ '+a.company,color:'#ef4444',type:'deadline'});
+    }
+  });
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date();
+  const grid=document.getElementById('cal-grid');grid.innerHTML='';
+  for(let i=0;i<firstDay;i++)grid.innerHTML+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const isToday=today.getDate()===d&&today.getMonth()===calMonth&&today.getFullYear()===calYear;
+    const evs=(events[d]||[]).slice(0,2);
+    grid.innerHTML+=`<div class="cal-day ${isToday?'today':''}">
+      <div class="cal-day-num" style="${isToday?'color:var(--primary);font-weight:800':''}">${d}</div>
+      ${evs.map(e=>`<div class="cal-event" style="background:${e.color}20;color:${e.color}">${e.label}</div>`).join('')}
+    </div>`;
+  }
+}
+function changeMonth(dir){
+  calMonth+=dir;if(calMonth>11){calMonth=0;calYear++}if(calMonth<0){calMonth=11;calYear--}
+  renderCalendar();
+}
+
+// ==================== ANALYTICS ====================
+function renderAnalytics(){
+  const apps=getData();
+  const statuses={};const types={};const months={};
+  apps.forEach(a=>{
+    statuses[a.status]=(statuses[a.status]||0)+1;
+    types[a.type]=(types[a.type]||0)+1;
+    const m=a.date?MONTHS_SHORT[parseInt(a.date.split('-')[1])-1]:'Other';
+    months[m]=(months[m]||0)+1;
+  });
+  renderBars('analytics-status-bars',statuses,Object.keys(STATUS_COLORS),s=>STATUS_COLORS[s]||'#4f46e5');
+  renderBars('analytics-type-bars',types,Object.keys(TYPE_COLORS),t=>TYPE_COLORS[t]||'#4f46e5');
+  renderBars('analytics-month-bars',months,MONTHS_SHORT.filter(m=>months[m]),()=>'#4f46e5');
+  // Funnel
+  const applied=apps.length;const reviewed=(statuses['Under Review']||0)+(statuses['Interview Scheduled']||0)+(statuses['Technical Round']||0)+(statuses['HR Round']||0)+(statuses['Offer Received']||0);
+  const interviewed=(statuses['Interview Scheduled']||0)+(statuses['Technical Round']||0)+(statuses['HR Round']||0)+(statuses['Offer Received']||0);
+  const offers=statuses['Offer Received']||0;
+  const f=document.getElementById('analytics-funnel');f.innerHTML='';
+  [{l:'Applied',v:applied,c:'#4f46e5'},{l:'Reviewed',v:reviewed,c:'#f59e0b'},{l:'Interviewed',v:interviewed,c:'#f97316'},{l:'Offers',v:offers,c:'#22c55e'}].forEach(s=>{
+    const pct=applied?Math.round(s.v/applied*100):0;
+    f.innerHTML+=`<div class="analytics-bar"><div class="analytics-label">${s.l}</div><div class="analytics-track"><div class="analytics-fill" style="width:${pct}%;background:${s.c}">${s.v}</div></div><div class="analytics-val">${pct}%</div></div>`;
+  });
+}
+function renderBars(id,data,keys,colorFn){
+  const max=Math.max(...Object.values(data),1);
+  const c=document.getElementById(id);c.innerHTML='';
+  keys.filter(k=>data[k]).forEach(k=>{
+    const pct=Math.round(data[k]/max*100);
+    c.innerHTML+=`<div class="analytics-bar"><div class="analytics-label" style="font-size:.72rem">${k}</div><div class="analytics-track"><div class="analytics-fill" style="width:${pct}%;background:${colorFn(k)}">${data[k]}</div></div><div class="analytics-val">${data[k]}</div></div>`;
+  });
+}
+
+// ==================== TOAST ====================
+function toast(msg,type='info'){
+  const w=document.getElementById('toast-wrap');const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<span>${type==='success'?'✅':type==='error'?'❌':'ℹ️'}</span><span>${msg}</span>`;
+  w.appendChild(t);setTimeout(()=>t.style.opacity='0',2500);setTimeout(()=>t.remove(),2800);
+}
+
+// ==================== CONFETTI ====================
+function confetti(){
+  const colors=['#4f46e5','#ec4899','#14b8a6','#f59e0b','#22c55e','#f97316'];
+  for(let i=0;i<60;i++){
+    const el=document.createElement('div');el.className='confetti-piece';
+    el.style.cssText=`left:${Math.random()*100}vw;background:${colors[Math.floor(Math.random()*colors.length)]};width:${r(6,12)}px;height:${r(6,12)}px;border-radius:${Math.random()>.5?'50%':'2px'}`;
+    document.body.appendChild(el);
+    const endX=(Math.random()-.5)*400;const endY=Math.random()*800+400;
+    const rot=Math.random()*720;
+    el.animate([
+      {transform:'translate(0,0) rotate(0deg)',opacity:1},
+      {transform:`translate(${endX}px,${endY}px) rotate(${rot}deg)`,opacity:0}
+    ],{duration:2500+Math.random()*1000,easing:'cubic-bezier(0.1,0.8,0.3,1)'}).onfinish=()=>el.remove();
+  }
+  toast('🎉 Offer received! Congratulations!','success');
+}
+function r(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+</script>
+</body>
+</html>

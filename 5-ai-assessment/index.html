@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SmartAssess AI — Powered by Gemini</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#050810;--bg2:#0a0f1e;--bg3:#0e1628;--bg4:#131d33;
+  --violet:#7c3aed;--violet-light:#a855f7;--cyan:#06b6d4;--pink:#f472b6;--green:#4ade80;--amber:#fbbf24;--red:#f87171;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#475569;--border:rgba(124,58,237,.2);
+  --glow-violet:0 0 20px rgba(124,58,237,.4);--glow-cyan:0 0 20px rgba(6,182,212,.4);--glow-pink:0 0 20px rgba(244,114,182,.35);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* PARTICLES */
+#particles{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+/* CONTENT */
+.app{position:relative;z-index:1}
+
+/* HEADER */
+.header{text-align:center;padding:40px 24px 24px;position:relative}
+.header-glow{position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:200px;background:radial-gradient(ellipse at center,rgba(124,58,237,.25) 0%,transparent 70%);pointer-events:none}
+.logo{font-family:'Orbitron',monospace;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;background:linear-gradient(135deg,var(--violet),var(--cyan),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;letter-spacing:2px}
+.subtitle{font-size:.88rem;color:var(--text2);letter-spacing:.5px}
+.subtitle span{color:var(--cyan)}
+.gemini-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.4);border-radius:20px;padding:6px 16px;font-size:.76rem;margin-top:12px;color:var(--violet-light)}
+.gemini-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+
+/* TABS */
+.tabs{display:flex;justify-content:center;gap:4px;padding:0 24px 24px;position:relative;z-index:2}
+.tab{padding:10px 24px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.02);color:var(--text2);font-size:.85rem;font-weight:600;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif}
+.tab:hover{border-color:rgba(124,58,237,.5);color:var(--violet-light)}
+.tab.active{background:rgba(124,58,237,.15);border-color:var(--violet);color:var(--violet-light);box-shadow:var(--glow-violet)}
+
+/* MAIN GRID */
+.main{max-width:1200px;margin:0 auto;padding:0 24px 60px;position:relative;z-index:1}
+.view{display:none}.view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.view.active{animation:fadeIn .3s ease}
+
+/* CARDS */
+.glass-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:16px;backdrop-filter:blur(12px);padding:24px;transition:.2s}
+.glass-card:hover{border-color:rgba(124,58,237,.4)}
+.card-title{font-family:'Orbitron',monospace;font-size:.85rem;font-weight:700;letter-spacing:1px;margin-bottom:18px;color:var(--cyan)}
+
+/* FORM */
+.config-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+label{font-size:.75rem;font-weight:600;color:var(--text2);letter-spacing:.4px;text-transform:uppercase}
+input[type=text],select,textarea{background:rgba(255,255,255,.04);border:1px solid rgba(124,58,237,.2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:.84rem;outline:none;transition:.2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--violet);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+select option{background:var(--bg2)}
+.slider-wrap{display:flex;align-items:center;gap:12px}
+input[type=range]{flex:1;accent-color:var(--violet);height:4px}
+.slider-val{font-family:'Orbitron',monospace;font-size:.9rem;font-weight:700;color:var(--violet-light);min-width:24px}
+.slider-labels{display:flex;justify-content:space-between;font-size:.65rem;color:var(--text3);margin-top:4px}
+.checkbox-group{display:flex;flex-wrap:wrap;gap:8px}
+.check-chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:rgba(255,255,255,.02);cursor:pointer;font-size:.78rem;transition:.2s;user-select:none}
+.check-chip:hover{border-color:rgba(124,58,237,.5)}
+.check-chip.selected{background:rgba(124,58,237,.15);border-color:var(--violet);color:var(--violet-light)}
+.num-selector{display:flex;gap:6px;flex-wrap:wrap}
+.num-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.02);color:var(--text2);cursor:pointer;font-size:.82rem;font-weight:600;transition:.2s;font-family:'Inter',sans-serif}
+.num-btn:hover{border-color:rgba(124,58,237,.5)}
+.num-btn.selected{background:rgba(124,58,237,.2);border-color:var(--violet);color:var(--violet-light)}
+
+/* GENERATE BUTTON */
+.generate-btn{width:100%;padding:16px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--violet),var(--cyan));color:#fff;font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;letter-spacing:2px;cursor:pointer;transition:.3s;position:relative;overflow:hidden;margin-top:4px}
+.generate-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(124,58,237,.5)}
+.generate-btn::before{content:'';position:absolute;top:-50%;left:-60%;width:30%;height:200%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transform:skewX(-20deg);animation:shimmer 3s infinite}
+@keyframes shimmer{0%{left:-60%}100%{left:160%}}
+.generate-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+/* QUIZ DISPLAY */
+.gen-layout{display:grid;grid-template-columns:350px 1fr;gap:16px}
+@media(max-width:900px){.gen-layout{grid-template-columns:1fr}}
+.question-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px;animation:fadeIn .3s ease;transition:.2s}
+.question-card:hover{border-color:rgba(124,58,237,.4)}
+.q-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.q-num{font-family:'Orbitron',monospace;font-size:.75rem;color:var(--violet-light);font-weight:700}
+.q-type-badge{font-size:.65rem;padding:3px 9px;border-radius:10px;font-weight:700;background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.3);color:var(--cyan)}
+.q-diff{font-size:.65rem;padding:3px 8px;border-radius:10px;margin-left:auto}
+.diff-1,.diff-2,.diff-3{background:rgba(74,222,128,.1);color:var(--green);border:1px solid rgba(74,222,128,.3)}
+.diff-4,.diff-5,.diff-6{background:rgba(251,191,36,.1);color:var(--amber);border:1px solid rgba(251,191,36,.3)}
+.diff-7,.diff-8,.diff-9,.diff-10{background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.3)}
+.q-text{font-size:.9rem;line-height:1.6;margin-bottom:14px}
+.options{display:flex;flex-direction:column;gap:8px}
+.option{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.08);cursor:pointer;transition:.2s;font-size:.84rem}
+.option:hover{border-color:rgba(124,58,237,.4);background:rgba(124,58,237,.05)}
+.option.selected{background:rgba(124,58,237,.12);border-color:var(--violet);color:var(--violet-light)}
+.option.correct{background:rgba(74,222,128,.1);border-color:var(--green);color:var(--green)}
+.option.wrong{background:rgba(248,113,113,.1);border-color:var(--red);color:var(--red)}
+.opt-key{font-family:'Orbitron',monospace;font-size:.75rem;font-weight:700;min-width:20px}
+.explanation{margin-top:12px;padding:12px;background:rgba(6,182,212,.06);border:1px solid rgba(6,182,212,.2);border-radius:8px;font-size:.8rem;color:var(--cyan);display:none}
+.explanation.show{display:block}
+.tf-options{display:flex;gap:10px}
+.tf-btn{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.08);cursor:pointer;text-align:center;font-weight:600;font-size:.85rem;transition:.2s;background:rgba(255,255,255,.02);color:var(--text);font-family:'Inter',sans-serif}
+.tf-btn:hover{border-color:rgba(124,58,237,.4)}
+.tf-btn.selected{background:rgba(124,58,237,.15);border-color:var(--violet);color:var(--violet-light)}
+.fill-input{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Inter',sans-serif;font-size:.84rem;outline:none;width:100%}
+.fill-input:focus{border-color:var(--violet)}
+
+/* TIMER */
+.timer-ring{display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+
+/* RESULTS */
+.score-ring-wrap{text-align:center;padding:30px}
+.score-big{font-family:'Orbitron',monospace;font-size:3rem;font-weight:900;background:linear-gradient(135deg,var(--violet),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.grade-badge{display:inline-block;font-family:'Orbitron',monospace;font-size:1.5rem;font-weight:900;padding:12px 30px;border-radius:12px;margin:8px 0}
+.result-row{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;margin-bottom:8px;font-size:.83rem}
+.result-correct{background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.2)}
+.result-wrong{background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2)}
+
+/* ANALYTICS */
+.analytics-bar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.bar-label{font-size:.78rem;color:var(--text2);width:120px;flex-shrink:0}
+.bar-track{flex:1;background:rgba(255,255,255,.06);border-radius:4px;height:20px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width 1s ease;display:flex;align-items:center;padding:0 8px;font-size:.68rem;font-weight:700;color:#fff}
+.bar-val{font-size:.75rem;color:var(--text2);width:40px;text-align:right}
+
+/* BANK */
+.bank-card{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px;cursor:pointer;transition:.2s}
+.bank-card:hover{border-color:rgba(124,58,237,.4)}
+
+/* LOADING */
+.skeleton{background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.04) 75%);background-size:200% 100%;animation:skeleton 1.5s infinite;border-radius:8px}
+@keyframes skeleton{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:.82rem;display:flex;align-items:center;gap:10px;animation:toastIn .3s ease;min-width:220px}
+.toast.success{border-color:rgba(74,222,128,.5);color:var(--green)}
+.toast.error{border-color:rgba(248,113,113,.5);color:var(--red)}
+.toast.info{border-color:rgba(6,182,212,.5);color:var(--cyan)}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ACHIEVEMENTS */
+.achievement{display:inline-flex;align-items:center;gap:6px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:20px;padding:5px 12px;font-size:.72rem;color:var(--amber)}
+
+/* STREAK */
+.streak-badge{font-family:'Orbitron',monospace;font-size:2rem;font-weight:900;color:var(--amber);text-shadow:0 0 20px rgba(251,191,36,.5)}
+
+@media(max-width:768px){.config-grid,.gen-layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-glow"></div>
+    <div class="logo">🧠 SmartAssess AI</div>
+    <div class="subtitle"><span id="typewriter"></span></div>
+    <div class="gemini-badge"><div class="dot"></div>Powered by Google Gemini • Adaptive Learning Engine</div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('generate',this)">⚡ Generate</button>
+    <button class="tab" onclick="showTab('analytics',this)">📊 Analytics</button>
+    <button class="tab" onclick="showTab('bank',this)">📚 Question Bank</button>
+  </div>
+
+  <div class="main">
+
+    <!-- TAB 1: GENERATE -->
+    <div class="view active" id="tab-generate">
+      <div class="gen-layout">
+
+        <!-- CONFIG PANEL -->
+        <div>
+          <div class="glass-card">
+            <div class="card-title">⚙️ Assessment Config</div>
+            <div class="config-grid">
+              <div class="form-group full">
+                <label>Topic / Subject</label>
+                <input id="g-topic" type="text" placeholder="e.g. Python Programming, World War II, Calculus"/>
+              </div>
+              <div class="form-group full">
+                <label>Focus Areas (optional)</label>
+                <input id="g-focus" type="text" placeholder="e.g. Functions, Loops, OOP"/>
+              </div>
+              <div class="form-group full">
+                <label>Difficulty Level: <span id="diff-label">Intermediate (5)</span></label>
+                <div class="slider-wrap">
+                  <span style="font-size:.72rem;color:var(--text2)">Easy</span>
+                  <input type="range" id="g-diff" min="1" max="10" value="5" oninput="updateDiff(this.value)"/>
+                  <span class="slider-val" id="diff-val">5</span>
+                  <span style="font-size:.72rem;color:var(--text2)">Expert</span>
+                </div>
+              </div>
+              <div class="form-group full">
+                <label>Question Types</label>
+                <div class="checkbox-group">
+                  <div class="check-chip selected" onclick="toggleChip(this,'mcq')">📋 MCQ</div>
+                  <div class="check-chip selected" onclick="toggleChip(this,'truefalse')">✅ True/False</div>
+                  <div class="check-chip" onclick="toggleChip(this,'fill')">✏️ Fill in Blank</div>
+                  <div class="check-chip" onclick="toggleChip(this,'short')">📝 Short Answer</div>
+                </div>
+              </div>
+              <div class="form-group full">
+                <label>Number of Questions</label>
+                <div class="num-selector">
+                  <button class="num-btn selected" onclick="selectNum(this,5)">5</button>
+                  <button class="num-btn" onclick="selectNum(this,10)">10</button>
+                  <button class="num-btn" onclick="selectNum(this,15)">15</button>
+                  <button class="num-btn" onclick="selectNum(this,20)">20</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Target Audience</label>
+                <select id="g-audience"><option>School</option><option selected>College</option><option>Professional</option><option>Competitive Exam</option></select>
+              </div>
+              <div class="form-group">
+                <label>Language</label>
+                <select id="g-lang"><option>English</option><option>Hindi</option><option>Mixed</option></select>
+              </div>
+              <div class="form-group full">
+                <label>Time Limit (minutes, 0 = no limit)</label>
+                <input type="number" id="g-time" value="0" min="0" max="120" placeholder="0"/>
+              </div>
+            </div>
+            <button class="generate-btn" id="gen-btn" onclick="generateAssessment()">✨ GENERATE ASSESSMENT</button>
+          </div>
+        </div>
+
+        <!-- QUIZ PANEL -->
+        <div>
+          <div id="quiz-panel">
+            <div class="glass-card" style="text-align:center;padding:60px 24px">
+              <div style="font-size:3rem;margin-bottom:12px">🎯</div>
+              <div style="font-family:'Orbitron',monospace;font-size:.9rem;color:var(--text2)">Configure your assessment and click Generate</div>
+              <div style="font-size:.8rem;color:var(--text3);margin-top:8px">Questions will appear here powered by Gemini AI</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 2: ANALYTICS -->
+    <div class="view" id="tab-analytics">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="glass-card">
+          <div class="card-title">📈 Score History</div>
+          <svg id="score-line" width="100%" height="180" viewBox="0 0 400 180"></svg>
+        </div>
+        <div class="glass-card">
+          <div class="card-title">🔥 Streak & Achievements</div>
+          <div style="text-align:center;padding:12px 0">
+            <div class="streak-badge" id="streak-num">0</div>
+            <div style="font-size:.78rem;color:var(--text2);margin-top:4px">Day Streak 🔥</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px" id="achievements"></div>
+          </div>
+        </div>
+        <div class="glass-card">
+          <div class="card-title">📊 Performance by Topic</div>
+          <div id="topic-bars"></div>
+        </div>
+        <div class="glass-card">
+          <div class="card-title">🎯 Question Type Accuracy</div>
+          <div id="type-bars"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: QUESTION BANK -->
+    <div class="view" id="tab-bank">
+      <div class="glass-card">
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+          <span>📚 Saved Questions</span>
+          <div style="display:flex;gap:8px">
+            <button class="num-btn" onclick="window.print()">🖨 Print</button>
+            <button class="num-btn" onclick="clearBank()" style="border-color:rgba(248,113,113,.3);color:var(--red)">🗑 Clear All</button>
+          </div>
+        </div>
+        <input type="text" id="bank-search" placeholder="🔍 Search by topic, question..." oninput="renderBank()" style="margin-bottom:14px"/>
+        <div id="bank-content"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ==================== PARTICLES ====================
+(()=>{
+  const canvas=document.getElementById('particles');const ctx=canvas.getContext('2d');
+  let stars=[];
+  function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;stars=Array.from({length:150},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.5+.5,op:Math.random(),speed:Math.random()*.3+.1}))}
+  resize();window.addEventListener('resize',resize);
+  function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.op+=s.speed*.01*(Math.random()>.5?1:-1);s.op=Math.max(.1,Math.min(.8,s.op));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(124,58,237,${s.op})`;ctx.fill()});requestAnimationFrame(draw)}
+  draw();
+})();
+
+// ==================== TYPEWRITER ====================
+(()=>{
+  const texts=['Automated Quiz Generation','Adaptive Difficulty Engine','Student Performance Analytics','Powered by Google Gemini AI'];
+  let ti=0,ci=0,del=false,el=document.getElementById('typewriter');
+  setInterval(()=>{
+    const t=texts[ti];
+    if(!del){el.textContent=t.slice(0,++ci);if(ci===t.length){del=true;setTimeout(()=>{del=true},1500)}}
+    else{el.textContent=t.slice(0,--ci);if(ci===0){del=false;ti=(ti+1)%texts.length}}
+  },80);
+})();
+
+// ==================== STATE ====================
+const API_KEY='AQ.Ab8RN6IJCg4CFMGcjIBH9bJRbH-NIiRrhckHfb4bKBvlC0IeNw';
+const API_URL=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+
+let selectedTypes=new Set(['mcq','truefalse']);
+let selectedNum=5;
+let currentQuestions=[];
+let userAnswers={};
+let submitted=false;
+let timerInterval=null;
+let timeLeft=0;
+
+function getHistory(){return JSON.parse(localStorage.getItem('sa_history')||'[]')}
+function saveHistory(h){localStorage.setItem('sa_history',JSON.stringify(h))}
+function getBank(){return JSON.parse(localStorage.getItem('sa_bank')||'[]')}
+function saveBank(b){localStorage.setItem('sa_bank',JSON.stringify(b))}
+
+// ==================== TABS ====================
+function showTab(name,el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  el.classList.add('active');
+  if(name==='analytics')renderAnalytics();
+  if(name==='bank')renderBank();
+}
+
+// ==================== CONFIG ====================
+function updateDiff(v){
+  document.getElementById('diff-val').textContent=v;
+  const labels=['','Beginner','Beginner','Elementary','Elementary','Intermediate','Intermediate','Advanced','Advanced','Expert','Expert'];
+  document.getElementById('diff-label').textContent=`${labels[v]} (${v})`;
+}
+function toggleChip(el,type){
+  el.classList.toggle('selected');
+  if(el.classList.contains('selected'))selectedTypes.add(type);
+  else selectedTypes.delete(type);
+}
+function selectNum(el,n){
+  document.querySelectorAll('.num-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');selectedNum=n;
+}
+
+// ==================== GENERATE ====================
+async function generateAssessment(){
+  const topic=document.getElementById('g-topic').value.trim();
+  if(!topic){toast('Please enter a topic!','error');return}
+  if(!selectedTypes.size){toast('Select at least one question type!','error');return}
+  const btn=document.getElementById('gen-btn');
+  btn.disabled=true;btn.textContent='🔄 GENERATING...';
+  submitted=false;userAnswers={};currentQuestions=[];
+  showLoadingSkeleton();
+  const diff=document.getElementById('g-diff').value;
+  const audience=document.getElementById('g-audience').value;
+  const lang=document.getElementById('g-lang').value;
+  const focus=document.getElementById('g-focus').value;
+  const types=[...selectedTypes];
+  const prompt=`Generate ${selectedNum} assessment questions about "${topic}"${focus?' focusing on: '+focus:''}.
+Target audience: ${audience}. Difficulty: ${diff}/10. Language: ${lang}.
+Question types to include (distribute evenly): ${types.join(', ')}.
+
+Return ONLY valid JSON with no markdown, no code blocks, just raw JSON:
+{
+  "questions": [
+    {
+      "id": 1,
+      "type": "mcq",
+      "question": "...",
+      "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
+      "correct_answer": "A",
+      "explanation": "Brief explanation",
+      "difficulty": ${diff}
+    }
+  ]
+}
+For true/false: options:["True","False"], correct_answer:"True" or "False"
+For fill: options:[], correct_answer:"the answer"
+For short: options:[], correct_answer:"model answer"
+Generate exactly ${selectedNum} questions. Make them educational and accurate.`;
+
+  try{
+    const resp=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:.7,maxOutputTokens:4096}})});
+    if(!resp.ok)throw new Error('API error '+resp.status);
+    const data=await resp.json();
+    let raw=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    raw=raw.replace(/```json/g,'').replace(/```/g,'').trim();
+    const parsed=JSON.parse(raw);
+    currentQuestions=parsed.questions||[];
+    if(!currentQuestions.length)throw new Error('No questions returned');
+    renderQuiz();
+    toast(`✅ ${currentQuestions.length} questions generated!`,'success');
+  }catch(err){
+    console.warn('API error:',err);
+    toast('Using sample questions (API unavailable)','info');
+    currentQuestions=getFallback(topic,selectedNum,diff);
+    renderQuiz();
+  }finally{
+    btn.disabled=false;btn.textContent='✨ GENERATE ASSESSMENT';
+  }
+}
+
+function showLoadingSkeleton(){
+  const p=document.getElementById('quiz-panel');
+  p.innerHTML=Array.from({length:3},()=>`<div class="question-card"><div class="skeleton" style="height:14px;width:60%;margin-bottom:12px"></div><div class="skeleton" style="height:20px;margin-bottom:16px"></div>${Array.from({length:4},()=>`<div class="skeleton" style="height:12px;margin-bottom:8px"></div>`).join('')}</div>`).join('');
+}
+
+function renderQuiz(){
+  const timeLimit=parseInt(document.getElementById('g-time').value)||0;
+  let html='';
+  if(timeLimit>0){
+    timeLeft=timeLimit*60;html+=`<div class="glass-card" style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;padding:14px 20px"><div style="font-family:'Orbitron',monospace;font-size:.8rem;color:var(--text2)">⏱ TIME REMAINING</div><div style="font-family:'Orbitron',monospace;font-size:1.4rem;font-weight:700;color:var(--amber)" id="timer-display">${formatTime(timeLeft)}</div></div>`;
+    clearInterval(timerInterval);timerInterval=setInterval(()=>{timeLeft--;document.getElementById('timer-display').textContent=formatTime(timeLeft);if(timeLeft<=60)document.getElementById('timer-display').style.color='var(--red)';if(timeLeft<=0){clearInterval(timerInterval);submitQuiz();}},1000);
+  }
+  currentQuestions.forEach((q,i)=>{
+    html+=`<div class="question-card" id="qcard-${i}"><div class="q-header"><span class="q-num">Q${i+1}/${currentQuestions.length}</span><span class="q-type-badge">${q.type?.toUpperCase()||'MCQ'}</span><span class="q-diff diff-${q.difficulty||5}">Lv.${q.difficulty||5}</span></div><div class="q-text">${q.question}</div>${renderAnswerInput(q,i)}<div class="explanation" id="exp-${i}">💡 <b>Explanation:</b> ${q.explanation||'No explanation provided.'}</div></div>`;
+  });
+  html+=`<div style="display:flex;gap:10px;margin-top:4px"><button class="generate-btn" onclick="submitQuiz()" style="flex:1">📊 SUBMIT ASSESSMENT</button><button onclick="saveToBank()" style="padding:14px 18px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;font-size:.85rem" title="Save to Question Bank">📚 Save</button></div>`;
+  document.getElementById('quiz-panel').innerHTML=html;
+}
+
+function renderAnswerInput(q,i){
+  const type=(q.type||'mcq').toLowerCase();
+  if(type==='mcq'||(!q.options?.length===false&&q.options?.length>2)){
+    return`<div class="options">${(q.options||[]).map((opt,oi)=>`<div class="option" id="opt-${i}-${oi}" onclick="selectOption(${i},${oi},'${opt.charAt(0)}')" ><span class="opt-key">${String.fromCharCode(65+oi)}.</span><span>${opt.replace(/^[A-D]\.\s*/,'')}</span></div>`).join('')}</div>`;
+  }
+  if(type==='truefalse'||type==='true/false'){
+    return`<div class="tf-options"><button class="tf-btn" id="tf-${i}-true" onclick="selectTF(${i},'True')">✅ True</button><button class="tf-btn" id="tf-${i}-false" onclick="selectTF(${i},'False')">❌ False</button></div>`;
+  }
+  if(type==='fill'||type==='fill in blank'||type==='fill_blank'){
+    return`<input class="fill-input" id="fill-${i}" placeholder="Type your answer..." oninput="userAnswers[${i}]=this.value"/>`;
+  }
+  return`<textarea class="fill-input" id="short-${i}" rows="3" placeholder="Write your answer..." oninput="userAnswers[${i}]=this.value" style="resize:vertical"></textarea>`;
+}
+
+function selectOption(qi,oi,key){
+  if(submitted)return;
+  document.querySelectorAll(`[id^="opt-${qi}-"]`).forEach(o=>o.classList.remove('selected'));
+  document.getElementById(`opt-${qi}-${oi}`).classList.add('selected');
+  userAnswers[qi]=key;
+}
+function selectTF(qi,val){
+  if(submitted)return;
+  document.getElementById(`tf-${qi}-true`).classList.toggle('selected',val==='True');
+  document.getElementById(`tf-${qi}-false`).classList.toggle('selected',val==='False');
+  userAnswers[qi]=val;
+}
+function formatTime(s){return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
+
+// ==================== SUBMIT ====================
+function submitQuiz(){
+  clearInterval(timerInterval);submitted=true;
+  let correct=0;
+  currentQuestions.forEach((q,i)=>{
+    const ua=String(userAnswers[i]||'').trim().toLowerCase();
+    const ca=String(q.correct_answer||'').trim().toLowerCase();
+    const isCorrect=ua===ca||(ua&&ca.includes(ua))||(ua.length>2&&ca.startsWith(ua));
+    if(isCorrect)correct++;
+    // Mark options
+    const type=(q.type||'mcq').toLowerCase();
+    if(type==='mcq'||(q.options?.length>2)){
+      q.options?.forEach((opt,oi)=>{
+        const el=document.getElementById(`opt-${i}-${oi}`);if(!el)return;
+        const optKey=String.fromCharCode(65+oi);
+        if(optKey.toLowerCase()===ca)el.classList.add('correct');
+        else if(el.classList.contains('selected'))el.classList.add('wrong');
+        el.style.pointerEvents='none';
+      });
+    }else if(type==='truefalse'||type==='true/false'){
+      ['true','false'].forEach(v=>{const el=document.getElementById(`tf-${i}-${v}`);if(el){el.disabled=true;if(v===ca)el.style.background='rgba(74,222,128,.15)';else if(el.classList.contains('selected'))el.style.background='rgba(248,113,113,.15)'}});
+    }
+    document.getElementById(`exp-${i}`)?.classList.add('show');
+  });
+  const pct=Math.round(correct/currentQuestions.length*100);
+  showResults(correct,currentQuestions.length,pct);
+  // Save to history
+  const h=getHistory();
+  h.unshift({date:new Date().toISOString(),topic:document.getElementById('g-topic').value,score:pct,correct,total:currentQuestions.length,diff:document.getElementById('g-diff').value});
+  saveHistory(h.slice(0,50));
+  if(pct>=90)toast('🏆 Outstanding! Perfect performance!','success');
+  else if(pct>=70)toast('🎉 Great job! Keep it up!','success');
+  else toast('📚 Review the explanations to improve!','info');
+}
+
+function showResults(correct,total,pct){
+  const grade=pct>=90?'A+':pct>=80?'A':pct>=70?'B':pct>=60?'C':pct>=50?'D':'F';
+  const gradeColor=pct>=70?'var(--green)':pct>=50?'var(--amber)':'var(--red)';
+  const panel=document.getElementById('quiz-panel');
+  const existing=panel.querySelector('.score-ring-wrap');if(existing)existing.remove();
+  const resultDiv=document.createElement('div');
+  resultDiv.className='glass-card score-ring-wrap';
+  resultDiv.style.cssText='margin-bottom:16px;animation:fadeIn .5s ease';
+  resultDiv.innerHTML=`
+    <svg width="120" height="120" viewBox="0 0 120 120" style="margin:0 auto 12px;display:block">
+      <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="8"/>
+      <circle cx="60" cy="60" r="50" fill="none" stroke="url(#rg)" stroke-width="8" stroke-linecap="round"
+        stroke-dasharray="314" stroke-dashoffset="${314-(pct/100)*314}" transform="rotate(-90 60 60)" style="transition:stroke-dashoffset 1s ease"/>
+      <defs><linearGradient id="rg"><stop stop-color="#7c3aed"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
+      <text x="60" y="55" text-anchor="middle" font-family="Orbitron,monospace" font-size="22" font-weight="900" fill="#e2e8f0">${pct}%</text>
+      <text x="60" y="72" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#94a3b8">Score</text>
+    </svg>
+    <div class="score-big">${correct}/${total}</div>
+    <div class="grade-badge" style="background:${gradeColor}15;border:1px solid ${gradeColor};color:${gradeColor}">Grade: ${grade}</div>
+    <p style="font-size:.82rem;color:var(--text2);margin-top:8px">${getMotivation(pct)}</p>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap">
+      <button onclick="generateAssessment()" style="padding:9px 18px;border-radius:8px;border:1px solid var(--violet);background:rgba(124,58,237,.12);color:var(--violet-light);cursor:pointer;font-family:'Inter',sans-serif;font-size:.82rem">🔄 New Quiz</button>
+      <button onclick="window.print()" style="padding:9px 18px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;font-size:.82rem">🖨 Print Report</button>
+    </div>`;
+  panel.insertBefore(resultDiv,panel.firstChild);
+  if(pct>=90)launchConfetti();
+}
+function getMotivation(pct){
+  if(pct>=90)return'🏆 Exceptional! You have mastered this topic!';
+  if(pct>=80)return'🌟 Excellent work! You\'re well on your way!';
+  if(pct>=70)return'👍 Good performance! A little more practice and you\'ll excel.';
+  if(pct>=60)return'📚 Decent effort! Review the highlighted areas to improve.';
+  return'💪 Don\'t give up! Review the material and try again — you\'ve got this!';
+}
+
+// ==================== SAVE TO BANK ====================
+function saveToBank(){
+  if(!currentQuestions.length){toast('Generate questions first!','error');return}
+  const bank=getBank();
+  const topic=document.getElementById('g-topic').value;
+  bank.push({id:Date.now(),topic,questions:currentQuestions,saved:new Date().toISOString()});
+  saveBank(bank);toast('Saved to Question Bank!','success');
+}
+function clearBank(){if(!confirm('Clear all saved questions?'))return;saveBank([]);renderBank();toast('Bank cleared','info')}
+function renderBank(){
+  const bank=getBank();const q=document.getElementById('bank-search')?.value?.toLowerCase()||'';
+  const c=document.getElementById('bank-content');
+  if(!bank.length){c.innerHTML='<div style="text-align:center;padding:40px;color:var(--text2)">📚 No saved questions yet. Generate and save assessments!</div>';return}
+  let html='';
+  bank.filter(b=>!q||b.topic.toLowerCase().includes(q)||b.questions.some(qq=>qq.question.toLowerCase().includes(q))).forEach(b=>{
+    html+=`<div class="bank-card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><b style="color:var(--cyan)">${b.topic}</b><div style="display:flex;gap:6px"><span style="font-size:.72rem;color:var(--text2)">${b.questions.length} questions · ${new Date(b.saved).toLocaleDateString()}</span><button onclick="deleteFromBank(${b.id})" style="border:none;background:none;color:var(--red);cursor:pointer;font-size:.9rem">🗑</button></div></div>${b.questions.slice(0,2).map(q=>`<div style="font-size:.78rem;color:var(--text2);padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)">• ${q.question.slice(0,80)}...</div>`).join('')}${b.questions.length>2?`<div style="font-size:.72rem;color:var(--text3);margin-top:4px">+${b.questions.length-2} more questions</div>`:''}</div>`;
+  });
+  c.innerHTML=html||'<div style="color:var(--text2);font-size:.85rem">No matching questions</div>';
+}
+function deleteFromBank(id){const bank=getBank().filter(b=>b.id!==id);saveBank(bank);renderBank();toast('Removed from bank','info')}
+
+// ==================== ANALYTICS ====================
+function renderAnalytics(){
+  const history=getHistory();
+  // Streak
+  let streak=0;const today=new Date();today.setHours(0,0,0,0);
+  const usedDates=new Set(history.map(h=>new Date(h.date).toDateString()));
+  for(let i=0;i<30;i++){const d=new Date(today);d.setDate(d.getDate()-i);if(usedDates.has(d.toDateString()))streak++;else break;}
+  document.getElementById('streak-num').textContent=streak;
+  // Achievements
+  const ach=[];
+  if(streak>=3)ach.push('🔥 3-Day Streak');if(streak>=7)ach.push('⚡ Week Warrior');
+  if(history.length>=5)ach.push('📚 Quiz Master');
+  if(history.some(h=>h.score===100))ach.push('💯 Perfect Score');
+  if(history.length>=10)ach.push('🏆 Dedicated Learner');
+  const ac=document.getElementById('achievements');
+  ac.innerHTML=ach.length?ach.map(a=>`<span class="achievement">${a}</span>`).join(''):'<span style="color:var(--text2);font-size:.8rem">Complete more quizzes to earn achievements!</span>';
+  // Score line chart
+  renderScoreLine(history.slice(0,10).reverse());
+  // Topic bars
+  const topics={};history.forEach(h=>{topics[h.topic]=topics[h.topic]||{total:0,count:0};topics[h.topic].total+=h.score;topics[h.topic].count++;});
+  const tb=document.getElementById('topic-bars');tb.innerHTML='';
+  Object.entries(topics).slice(0,6).forEach(([t,d])=>{
+    const avg=Math.round(d.total/d.count);
+    const color=avg>=70?'var(--green)':avg>=50?'var(--amber)':'var(--red)';
+    tb.innerHTML+=`<div class="analytics-bar"><div class="bar-label" style="font-size:.72rem">${t.slice(0,14)}</div><div class="bar-track"><div class="bar-fill" style="width:${avg}%;background:${color}">${avg}%</div></div><div class="bar-val">${avg}%</div></div>`;
+  });
+  if(!Object.keys(topics).length)tb.innerHTML='<div style="color:var(--text2);font-size:.82rem">Take some quizzes to see analytics!</div>';
+  // Type bars (simulated)
+  const typeBar=document.getElementById('type-bars');
+  typeBar.innerHTML=['MCQ (82%)','True/False (91%)','Fill in Blank (74%)','Short Answer (68%)'].map((t,i)=>{
+    const pct=parseInt(t.match(/\d+/)[0]);const colors=['var(--violet-light)','var(--cyan)','var(--pink)','var(--amber)'];
+    return`<div class="analytics-bar"><div class="bar-label" style="font-size:.7rem">${t.split(' (')[0]}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colors[i]}">${pct}%</div></div><div class="bar-val">${pct}%</div></div>`;
+  }).join('');
+}
+
+function renderScoreLine(history){
+  const svg=document.getElementById('score-line');svg.innerHTML='';
+  if(history.length<2){svg.innerHTML='<text x="200" y="90" text-anchor="middle" fill="#475569" font-size="13" font-family="Inter,sans-serif">Take at least 2 quizzes to see trend</text>';return}
+  const W=400,H=180,pad={t:15,r:20,b:25,l:35};
+  const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
+  const ns='http://www.w3.org/2000/svg';
+  const defs=document.createElementNS(ns,'defs');defs.innerHTML=`<linearGradient id="slg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7c3aed" stop-opacity=".4"/><stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/></linearGradient>`;svg.appendChild(defs);
+  const xS=i=>pad.l+i*(cW/(history.length-1));const yS=v=>pad.t+(1-v/100)*cH;
+  for(let i=0;i<=4;i++){const y=pad.t+i*cH/4;const ln=document.createElementNS(ns,'line');ln.setAttribute('x1',pad.l);ln.setAttribute('x2',pad.l+cW);ln.setAttribute('y1',y);ln.setAttribute('y2',y);ln.setAttribute('stroke','rgba(255,255,255,.07)');ln.setAttribute('stroke-width','1');svg.appendChild(ln);const t=document.createElementNS(ns,'text');t.setAttribute('x',pad.l-5);t.setAttribute('y',y+4);t.setAttribute('text-anchor','end');t.setAttribute('fill','#475569');t.setAttribute('font-size','9');t.textContent=100-i*25+'%';svg.appendChild(t);}
+  const area=document.createElementNS(ns,'path');let ad=`M${xS(0)},${pad.t+cH}`;history.forEach((d,i)=>ad+=` L${xS(i)},${yS(d.score)}`);ad+=` L${xS(history.length-1)},${pad.t+cH} Z`;area.setAttribute('d',ad);area.setAttribute('fill','url(#slg)');svg.appendChild(area);
+  const lp=document.createElementNS(ns,'path');let ld=`M${xS(0)},${yS(history[0].score)}`;history.forEach((d,i)=>{if(i)ld+=` L${xS(i)},${yS(d.score)}`});lp.setAttribute('d',ld);lp.setAttribute('fill','none');lp.setAttribute('stroke','#7c3aed');lp.setAttribute('stroke-width','2.5');lp.setAttribute('stroke-linecap','round');svg.appendChild(lp);
+  history.forEach((d,i)=>{const c=document.createElementNS(ns,'circle');c.setAttribute('cx',xS(i));c.setAttribute('cy',yS(d.score));c.setAttribute('r','4');c.setAttribute('fill',d.score>=70?'#4ade80':d.score>=50?'#fbbf24':'#f87171');svg.appendChild(c);});
+}
+
+// ==================== FALLBACK QUESTIONS ====================
+function getFallback(topic,count,diff){
+  const base=[
+    {id:1,type:'mcq',question:`Which of the following best describes "${topic}"?`,options:['A. A fundamental concept','B. An advanced theory','C. A practical application','D. A historical event'],correct_answer:'A',explanation:`"${topic}" is a foundational concept in its domain.`,difficulty:parseInt(diff)},
+    {id:2,type:'truefalse',question:`Is "${topic}" considered an important area of study?`,options:['True','False'],correct_answer:'True',explanation:`Yes, "${topic}" is widely studied and applied.`,difficulty:parseInt(diff)},
+    {id:3,type:'mcq',question:`What is the primary purpose of studying "${topic}"?`,options:['A. Entertainment','B. Building knowledge and skills','C. Only for academic credit','D. Historical interest only'],correct_answer:'B',explanation:'Studying any topic builds foundational knowledge and applicable skills.',difficulty:parseInt(diff)},
+    {id:4,type:'fill',question:`Complete: "${topic}" is a branch of _____.`,options:[],correct_answer:'knowledge',explanation:'Every subject is a branch of human knowledge.',difficulty:parseInt(diff)},
+    {id:5,type:'mcq',question:`Which skill is most enhanced by studying "${topic}"?`,options:['A. Critical thinking','B. Physical endurance','C. Social media management','D. Cooking'],correct_answer:'A',explanation:'Academic study enhances critical thinking above all else.',difficulty:parseInt(diff)},
+    {id:6,type:'truefalse',question:`Practical application is essential for mastering "${topic}".`,options:['True','False'],correct_answer:'True',explanation:'Application reinforces theoretical understanding.',difficulty:parseInt(diff)},
+    {id:7,type:'mcq',question:`What approach best accelerates learning "${topic}"?`,options:['A. Passive reading only','B. Active practice and problem solving','C. Memorizing definitions','D. Watching videos without notes'],correct_answer:'B',explanation:'Active learning with practice is the most effective approach.',difficulty:parseInt(diff)},
+    {id:8,type:'fill',question:`The study of "${topic}" requires both _____ and practice.`,options:[],correct_answer:'theory',explanation:'Balance between theory and practice is key.',difficulty:parseInt(diff)},
+    {id:9,type:'mcq',question:`Which resource is most useful for learning "${topic}"?`,options:['A. Textbooks and courses','B. Social media feeds','C. Entertainment videos','D. Random blogs'],correct_answer:'A',explanation:'Structured resources like textbooks provide organized, reliable learning.',difficulty:parseInt(diff)},
+    {id:10,type:'truefalse',question:`"${topic}" has real-world applications beyond academics.`,options:['True','False'],correct_answer:'True',explanation:'Most academic subjects have extensive real-world applications.',difficulty:parseInt(diff)},
+  ];
+  return base.slice(0,Math.min(count,base.length));
+}
+
+// ==================== CONFETTI ====================
+function launchConfetti(){
+  const colors=['#7c3aed','#06b6d4','#f472b6','#4ade80','#fbbf24'];
+  for(let i=0;i<80;i++){
+    const el=document.createElement('div');
+    el.style.cssText=`position:fixed;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;background:${colors[Math.floor(Math.random()*colors.length)]};top:-10px;left:${Math.random()*100}vw;border-radius:${Math.random()>.5?'50%':'2px'};pointer-events:none;z-index:9999`;
+    document.body.appendChild(el);
+    el.animate([{transform:'translate(0,0) rotate(0deg)',opacity:1},{transform:`translate(${(Math.random()-.5)*300}px,${Math.random()*700+300}px) rotate(${Math.random()*720}deg)`,opacity:0}],{duration:2000+Math.random()*1000,easing:'cubic-bezier(.1,.8,.3,1)'}).onfinish=()=>el.remove();
+  }
+}
+
+// ==================== TOAST ====================
+function toast(msg,type='info'){
+  const w=document.getElementById('toast-wrap');const t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=`<span>${type==='success'?'✅':type==='error'?'❌':'ℹ️'}</span><span>${msg}</span>`;w.appendChild(t);setTimeout(()=>t.remove(),3000);
+}
+
+// Easter egg
+let konamiSeq='';
+document.addEventListener('keypress',e=>{
+  konamiSeq+=e.key;if(konamiSeq.endsWith('gemini')){launchConfetti();toast('🌌 Gemini Easter Egg Activated!','success');konamiSeq=''}
+  if(konamiSeq.length>20)konamiSeq=konamiSeq.slice(-20);
+});
+</script>
+</body>
+</html>

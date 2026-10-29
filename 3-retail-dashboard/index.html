@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RetailIQ — Sales Intelligence Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0d1117;--bg2:#161b22;--bg3:#1c2128;
+  --green:#00ff88;--orange:#ff6b35;--blue:#58a6ff;--purple:#bc8cff;
+  --yellow:#ffd700;--red:#ff4d6d;--teal:#39d353;
+  --text:#c9d1d9;--text2:#8b949e;--border:rgba(255,255,255,.1);
+  --card:rgba(255,255,255,.03);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;gap:16px;height:60px;position:sticky;top:0;z-index:100}
+.logo{font-size:1.3rem;font-weight:800;background:linear-gradient(135deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap}
+.py-badge{background:rgba(0,255,136,.1);border:1px solid var(--green);color:var(--green);font-size:.65rem;padding:3px 10px;border-radius:20px;letter-spacing:1px;white-space:nowrap}
+.header-spacer{flex:1}
+.filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+select.flt{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-family:'Poppins',sans-serif;font-size:.78rem;outline:none;cursor:pointer}
+.btn-export{background:linear-gradient(135deg,var(--green),var(--blue));color:#000;border:none;padding:7px 16px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer}
+.container{padding:20px 28px;max-width:1600px;margin:0 auto}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;position:relative;overflow:hidden;transition:.2s}
+.kpi:hover{border-color:rgba(0,255,136,.3);transform:translateY(-2px)}
+.kpi-label{font-size:.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.kpi-value{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;line-height:1;margin-bottom:4px}
+.kpi-trend{font-size:.7rem}.trend-up{color:var(--green)}.trend-down{color:var(--red)}
+.kpi-icon{position:absolute;top:12px;right:12px;font-size:1.4rem;opacity:.35}
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px}
+.charts-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px}
+.chart-title{font-size:.86rem;font-weight:600;margin-bottom:14px;color:var(--text2);display:flex;align-items:center;justify-content:space-between}
+.chart-title .sub{font-size:.7rem;color:var(--text2)}
+.chart-svg{width:100%;overflow:visible}
+.bar-h{display:flex;flex-direction:column;gap:9px}
+.bar-h-row{display:flex;align-items:center;gap:8px}
+.bar-h-label{font-size:.68rem;color:var(--text2);width:90px;text-align:right;flex-shrink:0}
+.bar-h-track{flex:1;background:rgba(255,255,255,.06);border-radius:4px;height:20px;overflow:hidden}
+.bar-h-fill{height:100%;border-radius:4px;transition:width 1.2s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;padding:0 6px;font-size:.65rem;font-weight:700;color:#000;font-family:'JetBrains Mono',monospace}
+.bar-h-val{font-size:.7rem;color:var(--text2);font-family:'JetBrains Mono',monospace;width:50px}
+.funnel{display:flex;flex-direction:column;gap:6px}
+.funnel-row{display:flex;align-items:center;gap:8px}
+.funnel-label{font-size:.66rem;color:var(--text2);width:100px;flex-shrink:0}
+.insights-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:16px}
+.insight-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
+.insight-tag{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.insight-text{font-size:.8rem;line-height:1.5}
+.insight-card.green{border-color:rgba(0,255,136,.3)}.insight-card.green .insight-tag{color:var(--green)}
+.insight-card.orange{border-color:rgba(255,107,53,.3)}.insight-card.orange .insight-tag{color:var(--orange)}
+.insight-card.blue{border-color:rgba(88,166,255,.3)}.insight-card.blue .insight-tag{color:var(--blue)}
+.insight-card.red{border-color:rgba(255,77,109,.3)}.insight-card.red .insight-tag{color:var(--red)}
+.data-table-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.table-toolbar{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.table-toolbar h3{font-size:.88rem;font-weight:600}
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--bg3);padding:9px 12px;text-align:left;font-size:.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;cursor:pointer}
+thead th:hover{color:var(--green)}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:.15s}
+tbody tr:hover{background:rgba(0,255,136,.03)}
+tbody td{padding:9px 12px;font-size:.78rem}
+.badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:.62rem;font-weight:700}
+.hm-wrap{overflow-x:auto}
+.hm{display:grid;gap:2px}
+.hm-cell{width:16px;height:16px;border-radius:2px;cursor:pointer;display:inline-block}
+.tooltip-box{position:fixed;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:.73rem;pointer-events:none;z-index:9999;display:none;line-height:1.6;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.container>*{animation:fadeSlide .35s ease both}
+@media(max-width:900px){.charts-row,.charts-row-3{grid-template-columns:1fr}.header{flex-wrap:wrap;height:auto;padding:10px 16px}.filter-bar{order:3;width:100%}}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="logo">📊 RetailIQ</div>
+  <div class="py-badge">🐍 Python Analytics Engine</div>
+  <div class="header-spacer"></div>
+  <div class="filter-bar">
+    <select class="flt" id="flt-year" onchange="updateAll()"><option value="2024">FY 2024</option><option value="2023">FY 2023</option></select>
+    <select class="flt" id="flt-cat" onchange="updateAll()"><option value="all">All Categories</option><option>Electronics</option><option>Clothing</option><option>Food</option><option>Home &amp; Garden</option><option>Sports</option></select>
+    <select class="flt" id="flt-region" onchange="updateAll()"><option value="all">All Regions</option><option>North</option><option>South</option><option>East</option><option>West</option></select>
+    <button class="btn-export" onclick="exportCSV()">📥 Export CSV</button>
+  </div>
+</header>
+<div class="container">
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-icon">💰</div><div class="kpi-label">Total Revenue</div><div class="kpi-value" id="k-rev" style="color:var(--green)">₹24,85,430</div><div class="kpi-trend"><span class="trend-up">↑ 12.3%</span> vs last year</div></div>
+    <div class="kpi"><div class="kpi-icon">🛒</div><div class="kpi-label">Total Orders</div><div class="kpi-value" id="k-ord" style="color:var(--blue)">18,247</div><div class="kpi-trend"><span class="trend-up">↑ 8.1%</span> vs last year</div></div>
+    <div class="kpi"><div class="kpi-icon">💳</div><div class="kpi-label">Avg. Order Value</div><div class="kpi-value" id="k-aov" style="color:var(--purple)">₹1,362</div><div class="kpi-trend"><span class="trend-up">↑ 3.7%</span> vs last year</div></div>
+    <div class="kpi"><div class="kpi-icon">👥</div><div class="kpi-label">Customer Retention</div><div class="kpi-value" style="color:var(--yellow)">73.4%</div><div class="kpi-trend"><span class="trend-down">↓ 1.2%</span> vs last year</div></div>
+    <div class="kpi"><div class="kpi-icon">📈</div><div class="kpi-label">Profit Margin</div><div class="kpi-value" style="color:var(--orange)">28.6%</div><div class="kpi-trend"><span class="trend-up">↑ 2.1%</span> vs last year</div></div>
+    <div class="kpi"><div class="kpi-icon">⭐</div><div class="kpi-label">Top Category</div><div class="kpi-value" style="color:var(--teal);font-size:1rem;padding-top:4px">Electronics</div><div class="kpi-trend"><span style="color:var(--green)">38% of revenue</span></div></div>
+  </div>
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">📈 Monthly Revenue Trend <span class="sub" id="rev-lbl"></span></div>
+      <svg id="line-svg" class="chart-svg" height="220"></svg>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">🏷️ Category Sales Breakdown</div>
+      <div class="bar-h" id="cat-bar"></div>
+    </div>
+  </div>
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">🔥 Sales Heatmap — Hour of Day × Day of Week <span class="sub">Darker = Higher Sales</span></div>
+      <div id="heatmap-container"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">🎯 Customer Conversion Funnel</div>
+      <div class="funnel" id="funnel"></div>
+    </div>
+  </div>
+  <div class="charts-row">
+    <div class="chart-card" style="grid-column:1/2">
+      <div class="chart-title">⚡ Price vs. Sales Volume — Scatter Plot <span class="sub">Bubble = Revenue</span></div>
+      <svg id="scatter-svg" class="chart-svg" height="200"></svg>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">🏪 Top Store Performance</div>
+      <div class="bar-h" id="store-bar"></div>
+    </div>
+  </div>
+  <div style="font-size:1rem;font-weight:700;margin-bottom:12px">🤖 Python ML Insights &amp; Recommendations</div>
+  <div class="insights-grid" id="insights"></div>
+  <div class="data-table-wrap">
+    <div class="table-toolbar">
+      <h3>📦 Top Product Performance</h3>
+      <div style="display:flex;gap:8px">
+        <input placeholder="🔍 Search..." style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-family:'Poppins',sans-serif;font-size:.76rem;outline:none;width:180px" oninput="filterTbl(this.value)"/>
+        <select class="flt" onchange="sortTbl(this.value)"><option value="revenue">↓ Revenue</option><option value="units">↓ Units</option><option value="growth">↓ Growth</option></select>
+      </div>
+    </div>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>#</th><th>Product</th><th>Category</th><th>Units</th><th>Revenue</th><th>Growth</th><th>Margin</th><th>Status</th></tr></thead>
+      <tbody id="prod-tbody"></tbody>
+    </table></div>
+  </div>
+</div>
+<div class="tooltip-box" id="tip"></div>
+<script>
+const CAT_COLORS={Electronics:'#58a6ff',Clothing:'#bc8cff',Food:'#00ff88','Home & Garden':'#ffd700',Sports:'#ff6b35'};
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmt(n){return Number(n).toLocaleString('en-IN')}
+function r(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+// Deterministic seeded random
+function sRand(seed){let s=seed*9301+49297;return((s%233280)/233280)}
+
+const BASE_REV=[420,380,350,490,530,610,570,600,680,750,820,950];
+function monthData(year){
+  return BASE_REV.map((b,i)=>({month:i,rev:Math.round(b*1000*(0.92+sRand(year*17+i)*.16)),orders:r(1200,1700)}));
+}
+
+const PRODUCTS=[
+  {name:'Samsung 4K TV 55"',cat:'Electronics',price:62000,units:240,growth:18.2,margin:22},
+  {name:'iPhone 15 Case Bundle',cat:'Electronics',price:999,units:1200,growth:34.7,margin:68},
+  {name:"Levi's Slim Jeans",cat:'Clothing',price:2999,units:550,growth:12.1,margin:55},
+  {name:'Nike Air Max 2024',cat:'Sports',price:8500,units:220,growth:22.4,margin:38},
+  {name:'Organic Muesli 1kg',cat:'Food',price:450,units:1600,growth:8.3,margin:42},
+  {name:'Garden Hose Pro',cat:'Home & Garden',price:1200,units:400,growth:-3.2,margin:31},
+  {name:'Wireless Earbuds X',cat:'Electronics',price:3499,units:700,growth:28.6,margin:45},
+  {name:'Cotton Kurta Set',cat:'Clothing',price:1299,units:850,growth:9.8,margin:62},
+  {name:'Yoga Mat Premium',cat:'Sports',price:2200,units:480,growth:15.3,margin:52},
+  {name:'Green Tea Organic',cat:'Food',price:320,units:2100,growth:21.7,margin:58},
+  {name:'Smart LED Bulb 9W',cat:'Home & Garden',price:399,units:2800,growth:31.2,margin:44},
+  {name:'Running Shorts Pro',cat:'Sports',price:899,units:620,growth:11.5,margin:49},
+  {name:'Air Purifier 500sqft',cat:'Electronics',price:12999,units:130,growth:42.1,margin:28},
+  {name:'Silk Saree Designer',cat:'Clothing',price:4500,units:185,growth:-1.8,margin:72},
+  {name:'Pressure Cooker 5L',cat:'Home & Garden',price:1800,units:330,growth:5.2,margin:33},
+  {name:'Cricket Bat Kashmir',cat:'Sports',price:2800,units:250,growth:19.7,margin:41},
+  {name:'Chia Seeds 500g',cat:'Food',price:280,units:2500,growth:16.4,margin:55},
+  {name:'Laptop Stand Ergon.',cat:'Electronics',price:1599,units:500,growth:37.8,margin:61},
+  {name:"Denim Jacket Vintage",cat:'Clothing',price:2199,units:290,growth:7.3,margin:58},
+  {name:'Protein Powder 1kg',cat:'Food',price:1899,units:580,growth:24.5,margin:46},
+];
+PRODUCTS.forEach(p=>p.revenue=p.price*p.units);
+
+let sortKey='revenue';
+
+function showTip(e,html){
+  const t=document.getElementById('tip');t.innerHTML=html;t.style.display='block';
+  t.style.left=(e.clientX+14)+'px';t.style.top=(e.clientY-10)+'px';
+}
+function hideTip(){document.getElementById('tip').style.display='none'}
+
+function updateAll(){
+  const year=parseInt(document.getElementById('flt-year').value);
+  const cat=document.getElementById('flt-cat').value;
+  const md=monthData(year);
+  const totalRev=md.reduce((s,d)=>s+d.rev,0);
+  const totalOrd=md.reduce((s,d)=>s+d.orders,0);
+  document.getElementById('k-rev').textContent='₹'+fmt(totalRev);
+  document.getElementById('k-ord').textContent=fmt(totalOrd);
+  document.getElementById('k-aov').textContent='₹'+fmt(Math.round(totalRev/totalOrd));
+  renderLine(md);
+  renderCatBar(cat);
+  renderHeatmap();
+  renderFunnel();
+  renderScatter();
+  renderStores();
+  renderInsights();
+  renderProd(cat);
+}
+
+function renderLine(data){
+  const svg=document.getElementById('line-svg');
+  requestAnimationFrame(()=>{
+    const W=svg.parentElement.clientWidth||600;const H=220;
+    svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.innerHTML='';
+    const pl=55,pr=15,pt=15,pb=28;
+    const cW=W-pl-pr;const cH=H-pt-pb;
+    const maxV=Math.max(...data.map(d=>d.rev));const minV=Math.min(...data.map(d=>d.rev))*0.9;
+    const xS=i=>pl+i*(cW/11);const yS=v=>pt+(1-(v-minV)/(maxV-minV))*cH;
+    const ns='http://www.w3.org/2000/svg';
+    // defs gradient
+    const defs=document.createElementNS(ns,'defs');
+    defs.innerHTML=`<linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00ff88" stop-opacity=".5"/><stop offset="100%" stop-color="#00ff88" stop-opacity="0"/></linearGradient>`;
+    svg.appendChild(defs);
+    // grid lines
+    for(let i=0;i<5;i++){
+      const y=pt+i*cH/4;
+      const ln=document.createElementNS(ns,'line');ln.setAttribute('x1',pl);ln.setAttribute('x2',pl+cW);ln.setAttribute('y1',y);ln.setAttribute('y2',y);ln.setAttribute('stroke','rgba(255,255,255,.07)');ln.setAttribute('stroke-width','1');svg.appendChild(ln);
+      const lbl=document.createElementNS(ns,'text');lbl.setAttribute('x',pl-6);lbl.setAttribute('y',y+4);lbl.setAttribute('text-anchor','end');lbl.setAttribute('fill','#8b949e');lbl.setAttribute('font-size','9');lbl.setAttribute('font-family','Poppins,sans-serif');lbl.textContent='₹'+(Math.round((maxV-(i*(maxV-minV)/4))/1000))+'K';svg.appendChild(lbl);
+    }
+    // area
+    let aD=`M${xS(0)},${pt+cH}`;data.forEach((d,i)=>aD+=` L${xS(i)},${yS(d.rev)}`);aD+=` L${xS(11)},${pt+cH} Z`;
+    const area=document.createElementNS(ns,'path');area.setAttribute('d',aD);area.setAttribute('fill','url(#lg)');svg.appendChild(area);
+    // line
+    let lD=`M${xS(0)},${yS(data[0].rev)}`;data.forEach((d,i)=>{if(i)lD+=` L${xS(i)},${yS(d.rev)}`});
+    const lp=document.createElementNS(ns,'path');lp.setAttribute('d',lD);lp.setAttribute('fill','none');lp.setAttribute('stroke','#00ff88');lp.setAttribute('stroke-width','2.5');lp.setAttribute('stroke-linecap','round');svg.appendChild(lp);
+    // dots
+    data.forEach((d,i)=>{
+      const c=document.createElementNS(ns,'circle');c.setAttribute('cx',xS(i));c.setAttribute('cy',yS(d.rev));c.setAttribute('r','4');c.setAttribute('fill','#00ff88');c.style.cursor='pointer';
+      c.addEventListener('mousemove',e=>showTip(e,`<b style="color:#00ff88">${MONTHS[i]}</b><br>Revenue: ₹${fmt(d.rev)}<br>Orders: ${fmt(d.orders)}`));c.addEventListener('mouseleave',hideTip);svg.appendChild(c);
+      const lbl=document.createElementNS(ns,'text');lbl.setAttribute('x',xS(i));lbl.setAttribute('y',H-4);lbl.setAttribute('text-anchor','middle');lbl.setAttribute('fill','#8b949e');lbl.setAttribute('font-size','9');lbl.setAttribute('font-family','Poppins,sans-serif');lbl.textContent=MONTHS[i];svg.appendChild(lbl);
+    });
+    document.getElementById('rev-lbl').textContent='Total ₹'+fmt(data.reduce((s,d)=>s+d.rev,0));
+  });
+}
+
+function renderCatBar(filter){
+  const cats=[
+    {name:'Electronics',rev:9444634,share:38,growth:18.2},
+    {name:'Clothing',rev:5467946,share:22,growth:9.8},
+    {name:'Food',rev:4473774,share:18,growth:14.3},
+    {name:'Home & Garden',rev:2981316,share:12,growth:4.7},
+    {name:'Sports',rev:2486760,share:10,growth:17.1},
+  ];
+  const max=cats[0].rev;
+  const c=document.getElementById('cat-bar');c.innerHTML='';
+  cats.filter(ct=>filter==='all'||ct.name===filter).forEach(ct=>{
+    c.innerHTML+=`<div class="bar-h-row"><div class="bar-h-label">${ct.name}</div><div class="bar-h-track" onmousemove="showTip(event,'<b style=\'color:${CAT_COLORS[ct.name]}\'>${ct.name}</b><br>₹${fmt(ct.rev)}<br>Share: ${ct.share}%')" onmouseleave="hideTip()"><div class="bar-h-fill" style="width:${ct.rev/max*100}%;background:${CAT_COLORS[ct.name]}">₹${(ct.rev/100000).toFixed(1)}L</div></div><div class="bar-h-val" style="color:var(--green)">+${ct.growth}%</div></div>`;
+  });
+}
+
+function renderHeatmap(){
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const c=document.getElementById('heatmap-container');
+  let html='<div style="display:grid;grid-template-columns:36px repeat(24,1fr);gap:2px;min-width:520px">';
+  html+='<div></div>';
+  for(let h=0;h<24;h++)html+=`<div style="font-size:.52rem;color:#8b949e;text-align:center">${h}</div>`;
+  days.forEach((day,di)=>{
+    html+=`<div style="font-size:.62rem;color:#8b949e;display:flex;align-items:center;justify-content:flex-end;padding-right:4px">${day}</div>`;
+    for(let h=0;h<24;h++){
+      const peak=(h>=10&&h<=13)||(h>=18&&h<=21);
+      const med=h>=8&&h<=18;
+      const wkd=di>=5;
+      let intensity=peak?(wkd?.95:.78):med?(wkd?.55:.4):.08;
+      intensity=Math.min(1,intensity+(sRand(di*24+h)*.15));
+      html+=`<div style="background:rgba(0,255,136,${intensity.toFixed(2)});width:100%;aspect-ratio:1;border-radius:2px;cursor:pointer" title="${day} ${h}:00 — ${Math.round(intensity*400+50)} orders"></div>`;
+    }
+  });
+  html+='</div>';c.innerHTML=html;
+}
+
+function renderFunnel(){
+  const steps=[
+    {label:'Visitors',val:1250000,pct:100,color:'#58a6ff'},
+    {label:'Product Views',val:680000,pct:54,color:'#bc8cff'},
+    {label:'Add to Cart',val:185000,pct:14.8,color:'#ffd700'},
+    {label:'Checkout',val:72000,pct:5.8,color:'#ff6b35'},
+    {label:'Purchased',val:48500,pct:3.9,color:'#00ff88'},
+  ];
+  const f=document.getElementById('funnel');f.innerHTML='';
+  steps.forEach(s=>{
+    f.innerHTML+=`<div class="funnel-row"><div class="funnel-label">${s.label}</div><div style="flex:1;background:rgba(255,255,255,.06);border-radius:4px;height:28px;overflow:hidden"><div style="width:${s.pct}%;height:100%;background:${s.color}25;border-left:3px solid ${s.color};display:flex;align-items:center;padding:0 8px;font-size:.7rem;font-weight:700;color:${s.color};transition:width 1s ease">${fmt(s.val)}</div></div></div>`;
+  });
+}
+
+function renderScatter(){
+  const svg=document.getElementById('scatter-svg');
+  requestAnimationFrame(()=>{
+    const W=svg.parentElement.clientWidth||400;const H=200;
+    svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.innerHTML='';
+    const ns='http://www.w3.org/2000/svg';
+    const pl=45,pr=15,pt=10,pb=25;
+    const cW=W-pl-pr;const cH=H-pt-pb;
+    const maxP=Math.max(...PRODUCTS.map(p=>p.price));
+    const maxU=Math.max(...PRODUCTS.map(p=>p.units));
+    for(let i=0;i<4;i++){
+      const y=pt+i*cH/3;
+      const ln=document.createElementNS(ns,'line');ln.setAttribute('x1',pl);ln.setAttribute('x2',pl+cW);ln.setAttribute('y1',y);ln.setAttribute('y2',y);ln.setAttribute('stroke','rgba(255,255,255,.07)');ln.setAttribute('stroke-width','1');svg.appendChild(ln);
+    }
+    PRODUCTS.forEach(p=>{
+      const cx=pl+p.price/maxP*cW;
+      const cy=pt+(1-p.units/maxU)*cH;
+      const rad=Math.sqrt(p.revenue/2000000)*7+3;
+      const c=document.createElementNS(ns,'circle');c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',rad);c.setAttribute('fill',CAT_COLORS[p.cat]);c.setAttribute('opacity','0.7');c.style.cursor='pointer';c.style.transition='r .2s';
+      c.addEventListener('mousemove',e=>showTip(e,`<b style="color:${CAT_COLORS[p.cat]}">${p.name}</b><br>Price: ₹${fmt(p.price)}<br>Units: ${p.units}<br>Revenue: ₹${fmt(p.revenue)}`));
+      c.addEventListener('mouseleave',hideTip);svg.appendChild(c);
+    });
+    const lx=document.createElementNS(ns,'text');lx.setAttribute('x',pl+cW/2);lx.setAttribute('y',H-4);lx.setAttribute('text-anchor','middle');lx.setAttribute('fill','#8b949e');lx.setAttribute('font-size','10');lx.textContent='Price (₹)';svg.appendChild(lx);
+  });
+}
+
+function renderStores(){
+  const stores=[
+    {name:'Mumbai',rev:3524000},{name:'Delhi',rev:2987000},{name:'Bangalore',rev:2741000},
+    {name:'Chennai',rev:1985000},{name:'Kolkata',rev:1720000},{name:'Pune',rev:1542000}
+  ];
+  const max=stores[0].rev;const cols=['#00ff88','#58a6ff','#bc8cff','#ffd700','#ff6b35','#ff4d6d'];
+  const c=document.getElementById('store-bar');c.innerHTML='';
+  stores.forEach((s,i)=>{
+    c.innerHTML+=`<div class="bar-h-row"><div class="bar-h-label">${s.name}</div><div class="bar-h-track"><div class="bar-h-fill" style="width:${s.rev/max*100}%;background:${cols[i]}">₹${(s.rev/100000).toFixed(0)}L</div></div></div>`;
+  });
+}
+
+function renderInsights(){
+  const data=[
+    {type:'green',tag:'📈 Trend Alert',txt:'Electronics revenue surged <b>38%</b> in Q4 driven by festive demand. TV and audio categories led the growth.'},
+    {type:'orange',tag:'⚠️ Inventory Alert',txt:'Organic Muesli and Chia Seeds critically low. <b>Restock immediately</b> — projected stockout in 4 days.'},
+    {type:'blue',tag:'🤖 ML Prediction',txt:'Projected Q4 revenue: <b>₹32.1L</b> (seasonal ARIMA model, R²=0.94). Peak sales day: Nov 1.'},
+    {type:'red',tag:'🚨 Anomaly Detected',txt:'Mar 15 showed a <b>3.2σ sales drop</b> (−62% orders). Correlated with 4-hour site outage 2–6 PM.'},
+  ];
+  const g=document.getElementById('insights');g.innerHTML='';
+  data.forEach(d=>g.innerHTML+=`<div class="insight-card ${d.type}"><div class="insight-tag">${d.tag}</div><div class="insight-text">${d.txt}</div></div>`);
+}
+
+let sortKey='revenue';
+function renderProd(catFilter){
+  let prods=[...PRODUCTS];
+  if(catFilter&&catFilter!=='all')prods=prods.filter(p=>p.cat===catFilter);
+  prods.sort((a,b)=>(b[sortKey]||0)-(a[sortKey]||0));
+  const tb=document.getElementById('prod-tbody');tb.innerHTML='';
+  prods.slice(0,15).forEach((p,i)=>{
+    const gc=p.growth>0?'var(--green)':'var(--red)';
+    const gs=p.growth>25?'🔥 Hot':p.growth>10?'↑ Growing':p.growth>0?'→ Stable':'↓ Declining';
+    const gc2=p.growth>25?'rgba(0,255,136,.12),#00ff88':p.growth>10?'rgba(88,166,255,.12),#58a6ff':p.growth>0?'rgba(255,215,0,.1),#ffd700':'rgba(255,77,109,.12),#ff4d6d';
+    const [bg,col]=gc2.split(',');
+    tb.innerHTML+=`<tr><td style="color:var(--text2)">${i+1}</td><td><b>${p.name}</b></td><td><span class="badge" style="background:${CAT_COLORS[p.cat]}20;color:${CAT_COLORS[p.cat]}">${p.cat}</span></td><td style="font-family:'JetBrains Mono',monospace">${fmt(p.units)}</td><td style="font-family:'JetBrains Mono',monospace;color:var(--green);font-weight:600">₹${fmt(p.revenue)}</td><td style="color:${gc};font-weight:600">${p.growth>0?'+':''}${p.growth}%</td><td><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:3px"><div style="height:100%;border-radius:3px;background:var(--orange);width:${p.margin}%"></div></div><span style="font-size:.68rem;color:var(--text2)">${p.margin}%</span></div></td><td><span class="badge" style="background:${bg};color:${col}">${gs}</span></td></tr>`;
+  });
+}
+function filterTbl(q){
+  document.querySelectorAll('#prod-tbody tr').forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none'});
+}
+function sortTbl(k){sortKey=k;renderProd(document.getElementById('flt-cat').value)}
+function exportCSV(){
+  const rows=[['Product','Category','Units','Revenue','Growth','Margin'],...PRODUCTS.map(p=>[p.name,p.cat,p.units,p.revenue,p.growth+'%',p.margin+'%'])];
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='retailiq.csv';a.click();
+}
+window.onload=updateAll;
+window.addEventListener('resize',()=>updateAll());
+</script>
+</body>
+</html>
