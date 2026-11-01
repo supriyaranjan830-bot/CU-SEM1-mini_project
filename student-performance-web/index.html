@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101b2b">
+  <meta name="description" content="A C-powered student performance analyzer that turns marks and attendance into a personalized study plan.">
+  <title>StudentIQ — Performance & Study Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="StudentIQ home">
+      <span class="brand-mark">S<span>+</span></span>
+      <span class="brand-copy">student<span>IQ</span><small>PERFORMANCE LAB</small></span>
+    </a>
+    <div class="topbar-right">
+      <span class="engine-status"><span class="status-dot"></span><span id="engine-status-text">Loading C engine…</span></span>
+      <a class="top-link" href="#how-it-works">How it works <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+
+  <main id="top" class="shell">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-line"></span> YOUR ACADEMIC COMPASS</div>
+        <h1>Turn your marks<br>into a <em>smarter plan.</em></h1>
+        <p>Understand where you stand, identify what needs attention, and leave with a study plan built around your results.</p>
+        <div class="hero-points">
+          <span><b>01</b> Performance insights</span>
+          <span><b>02</b> Personal study plan</span>
+          <span><b>03</b> Weekly timetable</span>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+        <div class="orbit-core"><span>SIQ</span><small>ANALYZE</small></div>
+        <div class="orbit-chip chip-one"><span>↗</span> Growth</div>
+        <div class="orbit-chip chip-two"><span>◎</span> Focus</div>
+        <div class="orbit-chip chip-three"><span>✓</span> Progress</div>
+      </div>
+    </section>
+
+    <section class="workspace" aria-label="Student performance analyzer">
+      <div class="section-heading">
+        <div><div class="eyebrow"><span class="eyebrow-line"></span> START WITH YOUR DATA</div><h2>Student profile</h2></div>
+        <button type="button" class="text-button" id="load-demo">↻ Load sample data</button>
+      </div>
+
+      <form id="student-form" novalidate>
+        <div class="form-panel">
+          <div class="panel-heading"><span class="step-number">01</span><div><h3>Student details</h3><p>A few details to personalize your report.</p></div></div>
+          <div class="form-grid profile-grid">
+            <label class="field field-wide"><span>Student name</span><input id="student-name" name="studentName" type="text" maxlength="90" placeholder="e.g. Supriya Sharma" required autocomplete="name"></label>
+            <label class="field"><span>Roll number</span><input id="roll-number" name="rollNumber" type="text" maxlength="25" placeholder="e.g. 22CS1045" required></label>
+            <label class="field"><span>Semester</span><select id="semester" name="semester" required><option value="" disabled>Select semester</option><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option><option>8</option></select></label>
+            <label class="field"><span>Attendance <small>(%)</small></span><input id="attendance" name="attendance" type="number" min="0" max="100" step="0.1" value="78" required></label>
+            <label class="field"><span>Study hours per day</span><div class="input-suffix"><input id="study-hours" name="studyHours" type="number" min="0" max="24" step="0.5" value="4.5" required><span>hrs</span></div></label>
+          </div>
+        </div>
+
+        <div class="form-panel subjects-panel">
+          <div class="panel-heading panel-heading-between"><div class="panel-heading"><span class="step-number">02</span><div><h3>Subject marks</h3><p>Add each subject and the marks you received.</p></div></div><span class="subject-counter" id="subject-counter">6 / 15 subjects</span></div>
+          <div class="subject-labels"><span>SUBJECT NAME</span><span>MARKS OBTAINED</span><span>MAXIMUM MARKS</span><span></span></div>
+          <div id="subject-list" class="subject-list" aria-live="polite"></div>
+          <button id="add-subject" class="add-subject" type="button"><span>＋</span> Add another subject</button>
+        </div>
+
+        <div class="form-actions">
+          <p><span class="privacy-icon">◈</span> Your data stays in this browser. No account or server storage.</p>
+          <button class="analyze-button" id="analyze-button" type="submit"><span>Analyze my performance</span><span class="button-arrow">→</span></button>
+        </div>
+        <p class="form-error" id="form-error" role="alert" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section id="results" class="results-section" hidden aria-live="polite">
+      <div class="results-heading">
+        <div><div class="eyebrow"><span class="eyebrow-line"></span> YOUR PERSONALIZED REPORT</div><h2>Here's your academic snapshot.</h2><p id="report-subtitle">A clear view of your performance and what to do next.</p></div>
+        <button class="outline-button" id="print-report" type="button"><span>↧</span> Print report</button>
+      </div>
+
+      <div class="report-banner">
+        <div class="student-avatar" id="student-avatar">S</div>
+        <div class="report-person"><strong id="report-name">Student Name</strong><span id="report-meta">Roll number · Semester</span></div>
+        <div class="report-attendance"><span>ATTENDANCE</span><strong id="report-attendance">78%</strong></div>
+        <div class="report-study"><span>DAILY STUDY TIME</span><strong id="report-study">4.5 <small>hrs</small></strong></div>
+      </div>
+
+      <div id="risk-alerts" class="risk-alerts" hidden></div>
+
+      <div class="metric-grid">
+        <article class="metric-card metric-primary"><div class="metric-top"><span>OVERALL PERFORMANCE</span><span class="metric-icon">◒</span></div><div class="metric-value"><strong id="metric-percentage">—</strong><span>%</span></div><div class="metric-bottom"><div class="progress-track"><span id="overall-progress"></span></div><span id="metric-grade-label">Grade —</span></div></article>
+        <article class="metric-card"><div class="metric-top"><span>OVERALL GRADE</span><span class="metric-icon">✳</span></div><div class="metric-grade" id="metric-grade">—</div><div class="metric-caption">Based on your weighted marks</div></article>
+        <article class="metric-card"><div class="metric-top"><span>SGPA</span><span class="metric-icon">⌁</span></div><div class="metric-value"><strong id="metric-sgpa">—</strong><span class="metric-outof">/ 10</span></div><div class="metric-caption">Calculated using the project scale</div></article>
+        <article class="metric-card"><div class="metric-top"><span>RECOMMENDED STUDY</span><span class="metric-icon">◷</span></div><div class="metric-value"><strong id="metric-hours">—</strong><span class="metric-outof">hrs / day</span></div><div class="metric-caption" id="metric-hours-note">Personalized daily target</div></article>
+      </div>
+      <p class="calculation-note">CGPA is shown as an estimate using the original program's SGPA × 0.97 formula. It is not an official university CGPA conversion.</p>
+
+      <div class="dashboard-grid">
+        <article class="report-card subject-card">
+          <div class="card-heading"><div><span class="card-kicker">SUBJECT BREAKDOWN</span><h3>Where you stand</h3></div><span class="card-count" id="subject-total">6 subjects</span></div>
+          <div class="category-legend"><span><i class="legend-dot strong-dot"></i> Strong <b id="strong-count">0</b></span><span><i class="legend-dot average-dot"></i> Average <b id="average-count">0</b></span><span><i class="legend-dot weak-dot"></i> Weak <b id="weak-count">0</b></span></div>
+          <div id="subject-results" class="subject-results"></div>
+        </article>
+
+        <article class="report-card rec-card">
+          <div class="card-heading"><div><span class="card-kicker">NEXT BEST ACTIONS</span><h3>Your focus areas</h3></div><span class="sparkle">✳</span></div>
+          <div id="recommendation-list" class="recommendation-list"></div>
+        </article>
+
+        <article class="report-card plan-card">
+          <div class="card-heading"><div><span class="card-kicker">TIME ALLOCATION</span><h3>Daily study plan</h3></div><span class="plan-total" id="plan-total">6 hrs total</span></div>
+          <p class="card-description">A suggested split based on your subject categories.</p>
+          <div id="study-plan" class="study-plan"></div>
+          <div class="plan-tip"><span>✦</span><p><strong>Make it work for you.</strong> Use focused 25-minute sessions, take short breaks, and review difficult concepts within 24 hours.</p></div>
+        </article>
+
+        <article class="report-card career-card">
+          <div class="card-heading"><div><span class="card-kicker">LOOKING AHEAD</span><h3>Career directions</h3></div><span class="career-icon">↗</span></div>
+          <p class="card-description">Suggestions linked to your strongest subjects. Treat these as starting points to explore.</p>
+          <div id="career-list" class="career-list"></div>
+        </article>
+      </div>
+
+      <article class="report-card timetable-card">
+        <div class="card-heading"><div><span class="card-kicker">YOUR WEEK AT A GLANCE</span><h3>Suggested study timetable</h3></div><span class="timetable-note">Weak subjects are prioritized</span></div>
+        <div class="timetable-wrap"><table class="timetable"><thead id="timetable-head"></thead><tbody id="timetable-body"></tbody></table></div>
+        <div class="timetable-foot"><span><i class="legend-dot weak-dot"></i> Subject rotation prioritizes weaker areas</span><span>Sunday evening reserved for rest</span></div>
+      </article>
+
+      <div class="motivation-card"><span class="motivation-mark">“</span><div><span class="card-kicker">A NOTE FOR YOUR JOURNEY</span><p id="motivation-text">Keep showing up. Small improvements compound.</p></div><span class="motivation-star">✳</span></div>
+      <div class="report-footer"><span>STUDENTIQ · C-POWERED PERFORMANCE ENGINE</span><button type="button" id="back-to-form">← Edit student data</button></div>
+    </section>
+
+    <section id="how-it-works" class="how-section">
+      <div class="eyebrow"><span class="eyebrow-line"></span> UNDER THE HOOD</div>
+      <h2>Small inputs. Useful direction.</h2>
+      <div class="how-grid"><div><span class="how-number">01</span><h3>Enter your marks</h3><p>Provide your subject marks, attendance, and current daily study time.</p></div><div><span class="how-number">02</span><h3>C does the analysis</h3><p>The C engine calculates grades, identifies risk areas, and generates a subject-priority timetable.</p></div><div><span class="how-number">03</span><h3>Follow your plan</h3><p>Use the visual report to decide where to focus and how to divide your study time.</p></div></div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><span>© 2026 StudentIQ</span><span>Built with C · WebAssembly · Vercel</span></footer>
+  <script src="app.js" defer></script>
+</body>
+</html>
